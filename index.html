@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
   <title>Lock In Flip Clock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Roboto+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #000;
@@ -24,7 +31,7 @@
       min-height: 100%;
       background: var(--bg);
       color: var(--digit);
-      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: "Inter Tight", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overflow: hidden;
     }
 
@@ -65,8 +72,9 @@
       color: var(--muted);
       font-size: clamp(16px, 1.9vw, 30px);
       font-weight: 400;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       text-align: center;
+      font-optical-sizing: auto;
       white-space: nowrap;
     }
 
@@ -85,8 +93,13 @@
       background: var(--card);
       border-radius: var(--radius);
       overflow: hidden;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.012);
-      perspective: 1200px;
+      perspective: 1500px;
+      perspective-origin: 50% 50%;
+      transform-style: preserve-3d;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.018),
+        inset 0 -1px 0 rgba(0,0,0,0.58);
+      isolation: isolate;
     }
 
     .half,
@@ -99,9 +112,20 @@
       background: var(--card);
     }
 
+    .half.top {
+      top: 0;
+      background: linear-gradient(to bottom, #151515 0%, #121212 76%, #101010 100%);
+    }
+
+    .half.bottom {
+      bottom: 0;
+      background: linear-gradient(to bottom, #101010 0%, #121212 24%, #151515 100%);
+    }
+
     .top { top: 0; }
     .bottom { bottom: 0; }
 
+    /* The hinge is deliberately almost black and razor-thin, like the reference. */
     .half.top::after,
     .flip-layer.top::after {
       content: "";
@@ -109,9 +133,24 @@
       left: 0;
       right: 0;
       bottom: 0;
-      height: 2px;
-      background: var(--line);
+      height: 3px;
+      background: #050505;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.008);
       z-index: 8;
+      pointer-events: none;
+    }
+
+    .half.bottom::before,
+    .flip-layer.bottom::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: rgba(0,0,0,.76);
+      z-index: 8;
+      pointer-events: none;
     }
 
     .digit-wrap {
@@ -130,13 +169,15 @@
 
     .digit {
       display: block;
-      font-size: clamp(88px, 22vw, 280px);
-      line-height: 0.9;
-      font-weight: 680;
-      letter-spacing: -0.075em;
-      transform: translateX(-0.035em);
+      font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+      font-size: clamp(88px, 22.4vw, 286px);
+      line-height: 0.88;
+      font-weight: 600;
+      letter-spacing: -0.052em;
+      transform: translateX(-0.018em);
       color: var(--digit);
-      font-variant-numeric: tabular-nums;
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
     }
 
     .meridiem {
@@ -146,44 +187,118 @@
       z-index: 20;
       font-size: clamp(13px, 2.1vw, 28px);
       line-height: 1;
-      font-weight: 650;
+      font-family: "Inter Tight", Inter, sans-serif;
+      font-weight: 600;
       color: #d1d1d1;
-      letter-spacing: -0.03em;
+      letter-spacing: 0.01em;
     }
 
     .flip-layer {
-      z-index: 10;
+      z-index: 12;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform, filter, box-shadow;
+    }
+
+    .flip-layer .digit-wrap {
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
 
     .flip-layer.top {
       top: 0;
-      transform-origin: bottom;
+      transform-origin: 50% 100%;
+      background: linear-gradient(to bottom, #151515 0%, #121212 76%, #101010 100%);
+      transform: rotateX(0deg) translateZ(0.01px);
     }
 
     .flip-layer.bottom {
       bottom: 0;
-      transform-origin: top;
-      transform: rotateX(90deg);
+      transform-origin: 50% 0%;
+      background: linear-gradient(to bottom, #101010 0%, #121212 24%, #151515 100%);
+      transform: rotateX(90deg) translateZ(0.01px);
+      box-shadow: 0 -18px 32px rgba(0,0,0,0);
+    }
+
+    /* Moving light/shadow gives the flap thickness and depth during rotation. */
+    .flip-layer.top::before,
+    .flip-layer.bottom::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 7;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .flip-layer.top::before {
+      background: linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.62));
+    }
+
+    .flip-layer.bottom::before {
+      background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.04));
+      opacity: .6;
     }
 
     .flip-card.flipping .flip-layer.top {
-      animation: foldUp 240ms cubic-bezier(.55,.08,.68,.53) forwards;
+      animation: foldTop 285ms cubic-bezier(.46,.04,.73,.53) forwards;
+    }
+
+    .flip-card.flipping .flip-layer.top::before {
+      animation: shadeTop 285ms linear forwards;
     }
 
     .flip-card.flipping .flip-layer.bottom {
-      animation: foldDown 240ms 240ms cubic-bezier(.22,.61,.36,1) forwards;
+      animation: unfoldBottom 315ms 285ms cubic-bezier(.18,.63,.28,1) forwards;
     }
 
-    @keyframes foldUp {
-      0% { transform: rotateX(0deg); filter: brightness(1); }
-      100% { transform: rotateX(-90deg); filter: brightness(.72); }
+    .flip-card.flipping .flip-layer.bottom::before {
+      animation: shadeBottom 315ms 285ms linear forwards;
     }
 
-    @keyframes foldDown {
-      0% { transform: rotateX(90deg); filter: brightness(.7); }
-      100% { transform: rotateX(0deg); filter: brightness(1); }
+    @keyframes foldTop {
+      0% {
+        transform: rotateX(0deg) translateZ(0.01px);
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(0,0,0,0);
+      }
+      52% {
+        filter: brightness(.91);
+        box-shadow: 0 13px 24px rgba(0,0,0,.32);
+      }
+      100% {
+        transform: rotateX(-90deg) translateZ(0.01px);
+        filter: brightness(.56);
+        box-shadow: 0 24px 40px rgba(0,0,0,.52);
+      }
+    }
+
+    @keyframes unfoldBottom {
+      0% {
+        transform: rotateX(90deg) translateZ(0.01px);
+        filter: brightness(.56);
+        box-shadow: 0 -24px 40px rgba(0,0,0,.52);
+      }
+      48% {
+        filter: brightness(.9);
+        box-shadow: 0 -12px 24px rgba(0,0,0,.28);
+      }
+      100% {
+        transform: rotateX(0deg) translateZ(0.01px);
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(0,0,0,0);
+      }
+    }
+
+    @keyframes shadeTop {
+      0% { opacity: 0; }
+      100% { opacity: .74; }
+    }
+
+    @keyframes shadeBottom {
+      0% { opacity: .7; }
+      100% { opacity: 0; }
     }
 
     .message {
@@ -193,8 +308,9 @@
       padding: 6px 12px;
       color: var(--muted);
       font-size: clamp(15px, 1.7vw, 27px);
+      font-family: "Inter Tight", Inter, sans-serif;
       font-weight: 400;
-      letter-spacing: -0.02em;
+      letter-spacing: 0.005em;
       text-align: center;
       outline: none;
       border-radius: 8px;
@@ -217,6 +333,7 @@
       bottom: max(14px, env(safe-area-inset-bottom));
       transform: translateX(-50%);
       color: rgba(255,255,255,.34);
+      font-family: "Inter Tight", Inter, sans-serif;
       font-size: 11px;
       letter-spacing: .02em;
       opacity: 0;
@@ -275,7 +392,9 @@
 
     @media (prefers-reduced-motion: reduce) {
       .flip-card.flipping .flip-layer.top,
-      .flip-card.flipping .flip-layer.bottom { animation-duration: 1ms; animation-delay: 0ms; }
+      .flip-card.flipping .flip-layer.bottom,
+      .flip-card.flipping .flip-layer.top::before,
+      .flip-card.flipping .flip-layer.bottom::before { animation-duration: 1ms; animation-delay: 0ms; }
     }
   </style>
 </head>
@@ -324,6 +443,9 @@
 
       const state = { hours: null, minutes: null, seconds: null };
       let hintTimer = null;
+      let wakeLock = null;
+      let keepAwakeWanted = false;
+      let wakeRetryTimer = null;
 
       function showHint(text) {
         hint.textContent = text;
@@ -348,6 +470,9 @@
       }
 
       function flipTo(card, oldValue, newValue) {
+        const topStatic = card.querySelector('.half.top .current');
+        const bottomStatic = card.querySelector('.half.bottom .current');
+
         if (oldValue === null || oldValue === newValue) {
           setStatic(card, newValue);
           return;
@@ -357,15 +482,17 @@
         card.classList.remove('flipping');
         void card.offsetWidth;
 
-        // Base halves reveal the new number.
-        setStatic(card, newValue);
+        // A physical split-flap sequence:
+        // 1) the old TOP folds away while the old BOTTOM remains visible;
+        // 2) the new TOP is revealed;
+        // 3) the new BOTTOM swings down to complete the number.
+        topStatic.textContent = newValue;
+        bottomStatic.textContent = oldValue;
 
-        // Front top starts on old number and folds upward.
         const oldTop = document.createElement('div');
         oldTop.className = 'flip-layer top';
         oldTop.innerHTML = `<div class="digit-wrap"><span class="digit">${oldValue}</span></div>`;
 
-        // Front bottom starts hidden with the new number and folds down.
         const newBottom = document.createElement('div');
         newBottom.className = 'flip-layer bottom';
         newBottom.innerHTML = `<div class="digit-wrap"><span class="digit">${newValue}</span></div>`;
@@ -373,11 +500,19 @@
         card.append(oldTop, newBottom);
         card.classList.add('flipping');
 
+        // Swap the hidden static lower half exactly as the upper flap reaches the hinge.
+        const midpointTimer = setTimeout(() => {
+          bottomStatic.textContent = newValue;
+        }, 282);
+
         setTimeout(() => {
+          clearTimeout(midpointTimer);
+          topStatic.textContent = newValue;
+          bottomStatic.textContent = newValue;
           oldTop.remove();
           newBottom.remove();
           card.classList.remove('flipping');
-        }, 520);
+        }, 625);
       }
 
       function updateClock() {
@@ -408,24 +543,117 @@
         setInterval(updateClock, 1000);
       }, 1000 - (Date.now() % 1000) + 8);
 
-      async function toggleFullscreen() {
+      function isDisplayFullscreen() {
+        return Boolean(
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          window.navigator.standalone ||
+          window.matchMedia?.('(display-mode: fullscreen)').matches ||
+          window.matchMedia?.('(display-mode: standalone)').matches
+        );
+      }
+
+      async function requestWakeLock({ quiet = false } = {}) {
+        clearTimeout(wakeRetryTimer);
+        if (!keepAwakeWanted || document.visibilityState !== 'visible') return;
+        if (wakeLock && !wakeLock.released) return;
+
+        if (!('wakeLock' in navigator)) {
+          if (!quiet) showHint('Screen wake lock is not supported here');
+          return;
+        }
+
         try {
-          if (!document.fullscreenElement) {
-            if (document.documentElement.requestFullscreen) {
-              await document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-              document.documentElement.webkitRequestFullscreen();
-            } else {
-              showHint('Fullscreen is not supported by this browser');
-              return;
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => {
+            wakeLock = null;
+            if (keepAwakeWanted && document.visibilityState === 'visible') {
+              wakeRetryTimer = setTimeout(() => requestWakeLock({ quiet: true }), 250);
             }
+          }, { once: true });
+        } catch (_) {
+          wakeLock = null;
+          if (!quiet) showHint('Could not keep the display awake');
+        }
+      }
+
+      async function releaseWakeLock() {
+        clearTimeout(wakeRetryTimer);
+        if (!wakeLock) return;
+        try { await wakeLock.release(); } catch (_) {}
+        wakeLock = null;
+      }
+
+      async function toggleFullscreen() {
+        const activeFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+
+        try {
+          if (!activeFullscreen) {
+            // Set this before the request so the same user gesture can also authorize wake lock on iPadOS.
+            keepAwakeWanted = true;
+            await requestWakeLock({ quiet: true });
+
+            const target = document.documentElement;
+            if (target.requestFullscreen) {
+              try {
+                await target.requestFullscreen({ navigationUI: 'hide' });
+              } catch (_) {
+                await target.requestFullscreen();
+              }
+            } else if (target.webkitRequestFullscreen) {
+              target.webkitRequestFullscreen();
+            } else {
+              // Home Screen web apps may already be effectively fullscreen. Keep wake lock active there.
+              if (!isDisplayFullscreen()) {
+                keepAwakeWanted = false;
+                await releaseWakeLock();
+                showHint('For true iPad fullscreen, add this page to the Home Screen');
+                return;
+              }
+            }
+
+            await requestWakeLock({ quiet: true });
           } else {
+            keepAwakeWanted = false;
+            await releaseWakeLock();
             if (document.exitFullscreen) await document.exitFullscreen();
             else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
           }
         } catch (_) {
+          // If fullscreen was blocked, don't leave the wake lock running unexpectedly.
+          if (!isDisplayFullscreen()) {
+            keepAwakeWanted = false;
+            await releaseWakeLock();
+          }
           showHint('Fullscreen was blocked by the browser');
         }
+      }
+
+      function syncFullscreenState() {
+        const nativeFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+        const standalone = Boolean(window.navigator.standalone || window.matchMedia?.('(display-mode: standalone)').matches);
+
+        if (nativeFullscreen || standalone) {
+          keepAwakeWanted = true;
+          requestWakeLock({ quiet: true });
+        } else {
+          keepAwakeWanted = false;
+          releaseWakeLock();
+        }
+      }
+
+      document.addEventListener('fullscreenchange', syncFullscreenState);
+      document.addEventListener('webkitfullscreenchange', syncFullscreenState);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && keepAwakeWanted) {
+          requestWakeLock({ quiet: true });
+        }
+      });
+
+      // If launched from the iPad Home Screen, treat the app as fullscreen from startup.
+      if (isDisplayFullscreen()) {
+        keepAwakeWanted = true;
+        requestWakeLock({ quiet: true });
       }
 
       // Desktop double-click anywhere on the black canvas, except the editable message.
