@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="format-detection" content="telephone=no" />
-  <title>Lock In Flip Clock v5</title>
+  <title>Lock In Flip Clock v6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Roboto+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -434,26 +434,130 @@
     }
 
     .task-display {
-      margin-top: clamp(34px, 5.5vh, 68px);
-      width: min(94vw, 1080px);
+      margin-top: clamp(32px, 5vh, 62px);
+      width: min(94vw, 1100px);
       min-height: 1.25em;
-      padding: 10px 22px;
+      padding: 12px clamp(18px, 3vw, 38px);
       color: #d8d8d8;
       font-family: "Inter Tight", Inter, sans-serif;
-      font-size: clamp(32px, 5.2vw, 76px);
-      line-height: 1.05;
-      font-weight: 500;
-      letter-spacing: -.035em;
       text-align: center;
-      overflow-wrap: anywhere;
       touch-action: pan-y;
       cursor: default;
       display: none;
+      border-radius: 22px;
     }
 
     .task-display.active { display: block; }
     .focus-row.task-mode .message { display: none; }
     .focus-row.task-mode { margin-top: clamp(18px, 3vh, 34px); }
+
+    .task-main-row {
+      width: 100%;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: clamp(12px, 2vw, 24px);
+      flex-wrap: wrap;
+    }
+
+    .task-title {
+      max-width: 900px;
+      font-size: clamp(32px, 5.2vw, 76px);
+      line-height: 1.05;
+      font-weight: 500;
+      letter-spacing: -.035em;
+      overflow-wrap: anywhere;
+    }
+
+    .task-timer {
+      flex: 0 0 auto;
+      color: rgba(255,255,255,.38);
+      font-size: clamp(13px, 1.35vw, 19px);
+      font-weight: 500;
+      letter-spacing: .035em;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+      white-space: nowrap;
+    }
+
+    .checklist {
+      width: min(88vw, 760px);
+      margin: clamp(18px, 2.7vh, 28px) auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      text-align: left;
+    }
+
+    .check-item {
+      appearance: none;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: rgba(255,255,255,.68);
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      align-items: start;
+      gap: 13px;
+      padding: 7px 14px;
+      border-radius: 12px;
+      font: 400 clamp(15px, 1.7vw, 22px)/1.35 "Inter Tight", Inter, sans-serif;
+      text-align: left;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .check-item:hover { background: rgba(255,255,255,.035); }
+
+    .check-box {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      min-height: 22px;
+      margin-top: .08em;
+      border: 1.5px solid rgba(255,255,255,.35);
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      color: #111;
+      line-height: 1;
+      font-size: 14px;
+      font-weight: 700;
+      transition: background 140ms ease, border-color 140ms ease;
+    }
+
+    .check-item.checked .check-box {
+      background: rgba(235,235,235,.88);
+      border-color: rgba(235,235,235,.88);
+    }
+
+    .check-item.checked .check-box::after { content: "✓"; }
+
+    .check-label {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      transition: color 140ms ease, opacity 140ms ease;
+    }
+
+    .check-item.checked .check-label {
+      color: rgba(255,255,255,.30);
+      text-decoration: line-through;
+      text-decoration-thickness: 1.5px;
+    }
+
+    .all-done-title {
+      font-size: clamp(38px, 6.4vw, 92px);
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: -.04em;
+    }
+
+    .all-done-sub {
+      margin-top: 14px;
+      color: rgba(255,255,255,.28);
+      font-size: 12px;
+      letter-spacing: .09em;
+    }
 
     .task-counter {
       display: none;
@@ -463,6 +567,9 @@
       letter-spacing: .08em;
     }
     .task-counter.active { display: block; }
+
+    .clear-task-btn { display: none; }
+    .focus-row.task-mode .clear-task-btn { display: inline-flex; }
 
     .panel-backdrop {
       position: fixed;
@@ -477,21 +584,31 @@
     }
     .panel-backdrop.open { opacity: 1; pointer-events: auto; }
 
+    /* v6: panels are centered inside the clock frame, including fullscreen. */
     .panel {
       position: fixed;
       left: 50%;
-      bottom: max(20px, env(safe-area-inset-bottom));
-      width: min(92vw, 620px);
-      transform: translate(-50%, calc(100% + 48px));
+      top: 50%;
+      bottom: auto;
+      width: min(92vw, 650px);
+      max-height: min(78svh, 720px);
+      overflow: auto;
+      transform: translate(-50%, -50%) scale(.965);
+      opacity: 0;
+      pointer-events: none;
       border: 1px solid rgba(255,255,255,.1);
       border-radius: 24px;
       background: rgba(18,18,18,.97);
       box-shadow: 0 28px 90px rgba(0,0,0,.58);
       padding: 20px;
       z-index: 100;
-      transition: transform 220ms cubic-bezier(.2,.8,.2,1);
+      transition: transform 190ms cubic-bezier(.2,.8,.2,1), opacity 150ms ease;
     }
-    .panel.open { transform: translate(-50%, 0); }
+    .panel.open {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
 
     .panel-header {
       display: flex;
@@ -522,7 +639,7 @@
       font: 400 15px/1.45 "Inter Tight", Inter, sans-serif;
       padding: 12px 14px;
     }
-    .panel textarea { min-height: 130px; resize: vertical; }
+    .panel textarea { min-height: 230px; resize: vertical; }
     .panel textarea:focus, .panel input:focus { border-color: rgba(255,255,255,.24); }
 
     .panel-actions { display:flex; gap:9px; margin-top:12px; flex-wrap:wrap; }
@@ -532,6 +649,7 @@
       font:500 13px "Inter Tight", Inter, sans-serif;
     }
     .panel-action.primary { background:#e0e0e0; color:#101010; }
+    .panel-action.danger { color: rgba(255,255,255,.56); }
     .panel-note { color:rgba(255,255,255,.36); font-size:11px; line-height:1.45; margin-top:10px; }
 
     .yt-player-wrap {
@@ -558,8 +676,14 @@
 
     @media (max-width: 760px) {
       .focus-row { margin-top: clamp(30px, 5vh, 48px); gap: 4px; }
-      .task-display { font-size: clamp(28px, 9vw, 54px); padding-inline: 10px; }
-      .panel { border-radius: 20px; padding: 16px; }
+      .task-display { padding-inline: 8px; }
+      .task-title { font-size: clamp(28px, 9vw, 54px); }
+      .task-timer { font-size: 12px; }
+      .checklist { width: min(92vw, 620px); margin-top: 16px; }
+      .check-item { grid-template-columns: 20px minmax(0, 1fr); gap: 11px; padding-inline: 12px; }
+      .check-box { width: 20px; height: 20px; min-width:20px; min-height:20px; }
+      .panel { border-radius: 20px; padding: 16px; width:min(94vw,650px); }
+      .panel textarea { min-height: min(42svh, 300px); }
     }
 
   </style>
@@ -591,6 +715,7 @@
         <button class="audio-btn" id="audioBtn" type="button" aria-label="Open soundtrack controls">♫</button>
         <div class="message" id="message" title="Double-click to edit">LOCK IN</div>
         <button class="mode-btn" id="taskModeBtn" type="button" aria-label="Switch to task mode">TASK</button>
+        <button class="mode-btn clear-task-btn" id="quickClearTasksBtn" type="button" aria-label="Clear all tasks">CLEAR</button>
       </div>
       <div class="task-display task-swipe-hint" id="taskDisplay" title="Swipe left for next task, right for previous"></div>
       <div class="task-counter" id="taskCounter"></div>
@@ -600,16 +725,19 @@
 
     <div class="panel-backdrop" id="panelBackdrop"></div>
     <section class="panel" id="taskPanel" aria-label="Task list editor">
-      <div class="panel-header"><div class="panel-title">TASK MODE</div><button class="panel-close" data-close-panel type="button">×</button></div>
-      <textarea id="taskInput" placeholder="One task per line
-Finish chemistry worksheet
+      <div class="panel-header"><div class="panel-title">EDIT TASKS</div><button class="panel-close" data-close-panel type="button">×</button></div>
+      <textarea id="taskInput" placeholder="Finish chemistry worksheet
+- Question 1–5
+- Check answers
+
 Review matrices
-Write film scene"></textarea>
+- Determinants
+- Inverses"></textarea>
       <div class="panel-actions">
         <button class="panel-action primary" id="saveTasksBtn" type="button">Start tasks</button>
-        <button class="panel-action" id="clearTasksBtn" type="button">Clear</button>
+        <button class="panel-action danger" id="clearTasksBtn" type="button">Clear</button>
       </div>
-      <div class="panel-note">Swipe left for the next task, or swipe right to go back to the previous task.</div>
+      <div class="panel-note">Each normal line starts a task. Lines beginning with “-” become checklist items for the task above. Swipe left/right to move between tasks. Each task keeps its own timer.</div>
     </section>
 
     <section class="panel" id="audioPanel" aria-label="Soundtrack controls">
@@ -624,7 +752,7 @@ Write film scene"></textarea>
         <button class="panel-action" id="youtubeStopBtn" type="button">Stop</button>
       </div>
       <div class="yt-player-wrap" id="ytPlayerWrap"></div>
-      <div class="panel-note">YouTube requires its embedded player to remain visible during playback. The clock stays usable behind this small player.</div>
+      <div class="panel-note">YouTube requires its embedded player to remain visible during playback. Ads are controlled by YouTube and are not blocked by this clock. The clock stays usable behind this small player.</div>
     </section>
   </main>
 
@@ -643,6 +771,7 @@ Write film scene"></textarea>
       const taskInput = document.getElementById('taskInput');
       const saveTasksBtn = document.getElementById('saveTasksBtn');
       const clearTasksBtn = document.getElementById('clearTasksBtn');
+      const quickClearTasksBtn = document.getElementById('quickClearTasksBtn');
       const audioBtn = document.getElementById('audioBtn');
       const audioPanel = document.getElementById('audioPanel');
       const panelBackdrop = document.getElementById('panelBackdrop');
@@ -948,34 +1077,142 @@ Write film scene"></textarea>
       }, { passive: false });
 
 
-      // ---------- Task mode ----------
+      // ---------- Task mode v6 ----------
+      // A task owns its title, checklist state, and accumulated focus time.
       let tasks = [];
-      let taskIndex = 0;
+      let taskIndex = 0; // tasks.length is a valid special index = ALL DONE.
       let taskMode = false;
+      let activeTimerStartedAt = null;
+      let timerPaintInterval = null;
+      let lastPersistAt = 0;
+      let suppressChecklistClickUntil = 0;
+
+      function normalizeTask(raw) {
+        if (typeof raw === 'string') {
+          return { title: raw.trim(), checklist: [], elapsedMs: 0 };
+        }
+        if (!raw || typeof raw !== 'object') return null;
+        const title = String(raw.title || '').trim();
+        if (!title) return null;
+        const checklist = Array.isArray(raw.checklist)
+          ? raw.checklist.map(item => {
+              if (typeof item === 'string') return { text: item.trim(), done: false };
+              if (!item || typeof item !== 'object') return null;
+              const text = String(item.text || '').trim();
+              return text ? { text, done: Boolean(item.done) } : null;
+            }).filter(Boolean)
+          : [];
+        return {
+          title,
+          checklist,
+          elapsedMs: Math.max(0, Number(raw.elapsedMs) || 0)
+        };
+      }
 
       try {
         const savedTasks = JSON.parse(localStorage.getItem('flipclock-tasks') || '[]');
-        if (Array.isArray(savedTasks)) tasks = savedTasks.filter(Boolean);
-        taskIndex = Math.min(Number(localStorage.getItem('flipclock-task-index') || 0), Math.max(0, tasks.length - 1));
+        if (Array.isArray(savedTasks)) tasks = savedTasks.map(normalizeTask).filter(Boolean);
+        const savedIndex = Number(localStorage.getItem('flipclock-task-index') || 0);
+        taskIndex = Math.max(0, Math.min(Number.isFinite(savedIndex) ? savedIndex : 0, tasks.length));
       } catch (_) {}
 
+      function taskSnapshotForStorage() {
+        return tasks.map((task, i) => ({
+          title: task.title,
+          checklist: task.checklist.map(item => ({ text: item.text, done: item.done })),
+          elapsedMs: Math.max(0, Math.round(task.elapsedMs + (
+            activeTimerStartedAt !== null && i === taskIndex ? Date.now() - activeTimerStartedAt : 0
+          )))
+        }));
+      }
+
       function persistTasks() {
-        localStorage.setItem('flipclock-tasks', JSON.stringify(tasks));
+        localStorage.setItem('flipclock-tasks', JSON.stringify(taskSnapshotForStorage()));
         localStorage.setItem('flipclock-task-index', String(taskIndex));
+        lastPersistAt = Date.now();
+      }
+
+      function formatElapsed(ms) {
+        const total = Math.max(0, Math.floor(ms / 1000));
+        const hours = Math.floor(total / 3600);
+        const mins = Math.floor((total % 3600) / 60);
+        const secs = total % 60;
+        return [hours, mins, secs].map(v => String(v).padStart(2, '0')).join(':');
+      }
+
+      function currentElapsedFor(index) {
+        const task = tasks[index];
+        if (!task) return 0;
+        return task.elapsedMs + (activeTimerStartedAt !== null && index === taskIndex ? Date.now() - activeTimerStartedAt : 0);
+      }
+
+      function pauseActiveTimer({ persist = true } = {}) {
+        if (activeTimerStartedAt !== null && taskIndex < tasks.length && tasks[taskIndex]) {
+          tasks[taskIndex].elapsedMs += Date.now() - activeTimerStartedAt;
+        }
+        activeTimerStartedAt = null;
+        if (persist) persistTasks();
+      }
+
+      function resumeActiveTimer() {
+        if (!taskMode || document.visibilityState !== 'visible' || taskIndex >= tasks.length || !tasks[taskIndex]) return;
+        if (activeTimerStartedAt === null) activeTimerStartedAt = Date.now();
+      }
+
+      function updateTaskTimerPaint() {
+        const timer = taskDisplay.querySelector('[data-task-timer]');
+        if (timer && taskIndex < tasks.length) {
+          timer.textContent = formatElapsed(currentElapsedFor(taskIndex));
+        }
+        if (activeTimerStartedAt !== null && Date.now() - lastPersistAt > 5000) persistTasks();
+      }
+
+      function ensureTimerPaintLoop() {
+        if (timerPaintInterval) return;
+        timerPaintInterval = setInterval(updateTaskTimerPaint, 500);
+      }
+      ensureTimerPaintLoop();
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
       }
 
       function renderTask() {
-        const remaining = Math.max(0, tasks.length - taskIndex);
-        if (!tasks.length || taskIndex >= tasks.length) {
-          taskDisplay.textContent = tasks.length ? 'ALL DONE' : 'ADD YOUR TASKS';
-          taskCounter.textContent = tasks.length ? '0 LEFT' : '';
+        taskDisplay.innerHTML = '';
+
+        if (!tasks.length) {
+          taskDisplay.innerHTML = '<div class="task-main-row"><div class="task-title">ADD YOUR TASKS</div></div>';
+          taskCounter.textContent = '';
           return;
         }
-        taskDisplay.textContent = tasks[taskIndex];
+
+        if (taskIndex >= tasks.length) {
+          taskDisplay.innerHTML = '<div class="all-done-title">ALL DONE</div><div class="all-done-sub">SWIPE RIGHT TO GO BACK</div>';
+          taskCounter.textContent = '0 LEFT';
+          return;
+        }
+
+        const task = tasks[taskIndex];
+        const remaining = Math.max(0, tasks.length - taskIndex);
+        const checklistHtml = task.checklist.length
+          ? `<div class="checklist">${task.checklist.map((item, i) => `
+              <button class="check-item${item.done ? ' checked' : ''}" type="button" data-check-index="${i}" aria-pressed="${item.done ? 'true' : 'false'}">
+                <span class="check-box" aria-hidden="true"></span>
+                <span class="check-label">${escapeHtml(item.text)}</span>
+              </button>`).join('')}</div>`
+          : '';
+
+        taskDisplay.innerHTML = `
+          <div class="task-main-row">
+            <div class="task-title">${escapeHtml(task.title)}</div>
+            <div class="task-timer" data-task-timer>${formatElapsed(currentElapsedFor(taskIndex))}</div>
+          </div>
+          ${checklistHtml}`;
         taskCounter.textContent = `${remaining} LEFT`;
       }
 
       function setTaskMode(on) {
+        if (taskMode && !on) pauseActiveTimer({ persist: true });
         taskMode = on;
         focusRow.classList.toggle('task-mode', on);
         taskDisplay.classList.toggle('active', on);
@@ -983,6 +1220,7 @@ Write film scene"></textarea>
         taskModeBtn.classList.toggle('active', on);
         taskModeBtn.textContent = on ? 'EDIT' : 'TASK';
         renderTask();
+        if (on) resumeActiveTimer();
       }
 
       function openPanel(panel) {
@@ -997,41 +1235,124 @@ Write film scene"></textarea>
         panelBackdrop.classList.remove('open');
       }
 
-      taskModeBtn.addEventListener('click', () => {
+      function tasksToEditorText() {
+        return tasks.map(task => {
+          const lines = [task.title];
+          task.checklist.forEach(item => lines.push(`- ${item.text}`));
+          return lines.join('\n');
+        }).join('\n\n');
+      }
+
+      function parseEditorTasks(value) {
+        const lines = String(value || '').split(/\r?\n/);
+        const parsed = [];
+        let current = null;
+
+        for (const rawLine of lines) {
+          const trimmed = rawLine.trim();
+          if (!trimmed) continue;
+          if (/^[-•]\s+/.test(trimmed)) {
+            if (!current) continue;
+            const text = trimmed.replace(/^[-•]\s+/, '').trim();
+            if (text) current.checklist.push({ text, done: false });
+          } else {
+            current = { title: trimmed, checklist: [], elapsedMs: 0 };
+            parsed.push(current);
+          }
+        }
+
+        // Preserve timers and checked checklist items when titles/items still match.
+        const oldByTitle = new Map(tasks.map(t => [t.title.trim().toLowerCase(), t]));
+        return parsed.map(task => {
+          const old = oldByTitle.get(task.title.toLowerCase());
+          if (!old) return task;
+          const doneByText = new Map(old.checklist.map(item => [item.text.trim().toLowerCase(), item.done]));
+          task.elapsedMs = currentElapsedFor(tasks.indexOf(old));
+          task.checklist = task.checklist.map(item => ({
+            text: item.text,
+            done: Boolean(doneByText.get(item.text.toLowerCase()))
+          }));
+          return task;
+        });
+      }
+
+      taskModeBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
         if (!taskMode) {
-          if (!tasks.length) {
+          if (tasks.length) {
+            // Preserve v5 behavior: TASK enters focus mode immediately when a queue exists.
+            setTaskMode(true);
+          } else {
             taskInput.value = '';
             openPanel(taskPanel);
-            setTimeout(() => taskInput.focus(), 220);
-          } else {
-            setTaskMode(true);
           }
         } else {
-          taskInput.value = tasks.slice(taskIndex).join('\n');
+          // EDIT stays inside the current fullscreen document.
+          taskInput.value = tasksToEditorText();
           openPanel(taskPanel);
-          setTimeout(() => taskInput.focus(), 220);
+        }
+        // Intentionally do not auto-focus. On iPad that can cause Safari to alter
+        // fullscreen presentation as the software keyboard opens.
+      });
+
+      saveTasksBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        pauseActiveTimer({ persist: false });
+        tasks = parseEditorTasks(taskInput.value);
+        taskIndex = tasks.length ? Math.min(taskIndex, tasks.length - 1) : 0;
+        persistTasks();
+        closePanels();
+        if (tasks.length) {
+          setTaskMode(true);
+          showHint('Task mode started');
+        } else {
+          setTaskMode(false);
+          showHint('Add at least one task');
         }
       });
 
-      saveTasksBtn.addEventListener('click', () => {
-        tasks = taskInput.value.split(/\n+/).map(t => t.trim()).filter(Boolean);
-        taskIndex = 0;
-        persistTasks();
-        renderTask();
-        setTaskMode(true);
-        closePanels();
-        showHint(tasks.length ? 'Task mode started' : 'Add at least one task');
-      });
-
-      clearTasksBtn.addEventListener('click', () => {
+      function clearAllTasks() {
+        pauseActiveTimer({ persist: false });
         tasks = [];
         taskIndex = 0;
-        persistTasks();
+        activeTimerStartedAt = null;
+        localStorage.removeItem('flipclock-tasks');
+        localStorage.removeItem('flipclock-task-index');
         taskInput.value = '';
+        closePanels();
+        setTaskMode(false);
+        showHint('Tasks cleared');
+      }
+
+      clearTasksBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearAllTasks();
+      });
+      quickClearTasksBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearAllTasks();
+      });
+
+      taskDisplay.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-check-index]');
+        if (!button || Date.now() < suppressChecklistClickUntil || taskIndex >= tasks.length) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const i = Number(button.dataset.checkIndex);
+        const item = tasks[taskIndex]?.checklist?.[i];
+        if (!item) return;
+        item.done = !item.done;
+        persistTasks();
         renderTask();
       });
 
-      // Swipe through tasks in either direction. Left = next, right = previous.
+      // Swipe through tasks. Left = next. Swiping left from the final task = ALL DONE.
+      // Right = previous. Swiping right from ALL DONE returns to the final task and resumes its timer.
       let taskTouchStartX = null;
       let taskTouchStartY = null;
       let taskTouchDx = 0;
@@ -1040,25 +1361,26 @@ Write film scene"></textarea>
         if (!tasks.length) return;
         const goingNext = direction === 'next';
         const targetIndex = goingNext
-          ? Math.min(taskIndex + 1, tasks.length - 1)
+          ? Math.min(taskIndex + 1, tasks.length)
           : Math.max(taskIndex - 1, 0);
 
-        // At either end, softly snap back instead of disappearing.
         if (targetIndex === taskIndex) {
           taskDisplay.style.transform = '';
           taskDisplay.style.opacity = '';
           return;
         }
 
+        pauseActiveTimer({ persist: false });
+        suppressChecklistClickUntil = Date.now() + 420;
         taskDisplay.style.transform = '';
         taskDisplay.style.opacity = '';
         taskDisplay.classList.add(goingNext ? 'next' : 'prev');
+
         setTimeout(() => {
           taskIndex = targetIndex;
           persistTasks();
           renderTask();
           taskDisplay.classList.remove('next', 'prev');
-          // Bring the new task in from the opposite side.
           taskDisplay.style.transition = 'none';
           taskDisplay.style.transform = `translateX(${goingNext ? '34px' : '-34px'})`;
           taskDisplay.style.opacity = '0';
@@ -1066,6 +1388,7 @@ Write film scene"></textarea>
             taskDisplay.style.transition = '';
             taskDisplay.style.transform = '';
             taskDisplay.style.opacity = '';
+            resumeActiveTimer();
           }));
         }, 145);
       }
@@ -1085,9 +1408,9 @@ Write film scene"></textarea>
         const dx = t.clientX - taskTouchStartX;
         const dy = t.clientY - taskTouchStartY;
         if (Math.abs(dx) > Math.abs(dy)) {
-          taskTouchDx = Math.max(-90, Math.min(90, dx));
-          taskDisplay.style.transform = `translateX(${taskTouchDx * .35}px)`;
-          taskDisplay.style.opacity = String(Math.max(.58, 1 - Math.abs(taskTouchDx) / 240));
+          taskTouchDx = Math.max(-100, Math.min(100, dx));
+          taskDisplay.style.transform = `translateX(${taskTouchDx * .34}px)`;
+          taskDisplay.style.opacity = String(Math.max(.58, 1 - Math.abs(taskTouchDx) / 245));
         }
       }, {passive:true});
 
@@ -1108,11 +1431,19 @@ Write film scene"></textarea>
         }
       }, {passive:true});
 
-      // Desktop convenience: double-click the task to mark it complete.
-      taskDisplay.addEventListener('dblclick', () => {
-        if (!taskMode || !tasks.length || taskIndex >= tasks.length - 1) return;
+      taskDisplay.addEventListener('dblclick', (event) => {
+        if (event.target.closest('[data-check-index]')) return;
+        if (!taskMode || !tasks.length) return;
         animateTaskChange('next');
       });
+
+      // The timer represents active focus time, so pause while the app is hidden and
+      // automatically resume the same task when the clock becomes visible again.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') pauseActiveTimer({ persist: true });
+        else resumeActiveTimer();
+      });
+      window.addEventListener('pagehide', () => pauseActiveTimer({ persist: true }));
 
       // ---------- Soundtrack ----------
       function extractYouTubeId(value) {
