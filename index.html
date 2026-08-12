@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="format-detection" content="telephone=no" />
-  <title>Lock In Flip Clock v6</title>
+  <title>Lock In Flip Clock v7</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Roboto+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -33,11 +33,13 @@
       color: var(--digit);
       font-family: "Inter Tight", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overflow: hidden;
+      overscroll-behavior: none;
     }
 
     body {
       min-height: 100svh;
       touch-action: manipulation;
+      overscroll-behavior: none;
       user-select: none;
       -webkit-user-select: none;
       -webkit-tap-highlight-color: transparent;
@@ -57,6 +59,7 @@
         max(24px, env(safe-area-inset-bottom))
         max(18px, env(safe-area-inset-left));
       cursor: default;
+      overscroll-behavior: none;
     }
 
     .shell {
@@ -398,7 +401,7 @@
     }
 
 
-    /* v4 — subtle focus controls */
+    /* v7 — focus controls */
     .focus-row {
       margin-top: clamp(42px, 7vh, 90px);
       display: flex;
@@ -584,7 +587,7 @@
     }
     .panel-backdrop.open { opacity: 1; pointer-events: auto; }
 
-    /* v6: panels are centered inside the clock frame, including fullscreen. */
+    /* v7: panels stay centered inside the fullscreen clock document. */
     .panel {
       position: fixed;
       left: 50%;
@@ -593,6 +596,9 @@
       width: min(92vw, 650px);
       max-height: min(78svh, 720px);
       overflow: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       transform: translate(-50%, -50%) scale(.965);
       opacity: 0;
       pointer-events: none;
@@ -639,7 +645,7 @@
       font: 400 15px/1.45 "Inter Tight", Inter, sans-serif;
       padding: 12px 14px;
     }
-    .panel textarea { min-height: 230px; resize: vertical; }
+    .panel textarea { min-height: 230px; resize: vertical; overscroll-behavior: contain; touch-action: pan-y; }
     .panel textarea:focus, .panel input:focus { border-color: rgba(255,255,255,.24); }
 
     .panel-actions { display:flex; gap:9px; margin-top:12px; flex-wrap:wrap; }
@@ -673,6 +679,97 @@
     .task-swipe-hint.swiping { opacity:.72; transition: none; }
     .task-swipe-hint.next { opacity:0; transform:translateX(-44px); }
     .task-swipe-hint.prev { opacity:0; transform:translateX(44px); }
+
+
+
+    /* v7: every task is itself a checklist item. There is no subtask hierarchy. */
+    .task-current {
+      width: min(94vw, 1020px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: clamp(12px, 2vw, 22px);
+      text-align: left;
+    }
+
+    .task-current-check {
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      min-height: 28px;
+      border: 1.5px solid rgba(255,255,255,.38);
+      border-radius: 7px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      color: #111;
+      cursor: pointer;
+      padding: 0;
+      justify-self: start;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .task-current-check.checked {
+      background: rgba(235,235,235,.9);
+      border-color: rgba(235,235,235,.9);
+    }
+    .task-current-check.checked::after {
+      content: "✓";
+      font: 700 17px/1 "Inter Tight", Inter, sans-serif;
+    }
+
+    .task-title.done {
+      color: rgba(255,255,255,.34);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: rgba(255,255,255,.42);
+    }
+
+    .audio-history {
+      margin-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.075);
+      padding-top: 14px;
+    }
+    .audio-history-title {
+      color: rgba(255,255,255,.38);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      margin: 0 2px 8px;
+    }
+    .audio-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 180px;
+      overflow: auto;
+      overscroll-behavior: contain;
+    }
+    .audio-history-item {
+      appearance: none;
+      border: 0;
+      width: 100%;
+      background: transparent;
+      color: rgba(255,255,255,.62);
+      text-align: left;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font: 400 13px/1.3 "Inter Tight", Inter, sans-serif;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .audio-history-item:hover { background: rgba(255,255,255,.045); color: rgba(255,255,255,.82); }
+    .audio-history-empty { color: rgba(255,255,255,.25); font-size: 12px; padding: 8px 10px; }
+
+    @media (max-width: 760px) {
+      .task-current { grid-template-columns: 24px minmax(0,1fr); align-items: start; gap: 11px; }
+      .task-current-check { width: 23px; height: 23px; min-width:23px; min-height:23px; margin-top: 5px; }
+      .task-current .task-timer { grid-column: 2; justify-self: start; margin-top: -5px; }
+    }
 
     @media (max-width: 760px) {
       .focus-row { margin-top: clamp(30px, 5vh, 48px); gap: 4px; }
@@ -727,32 +824,39 @@
     <section class="panel" id="taskPanel" aria-label="Task list editor">
       <div class="panel-header"><div class="panel-title">EDIT TASKS</div><button class="panel-close" data-close-panel type="button">×</button></div>
       <textarea id="taskInput" placeholder="Finish chemistry worksheet
-- Question 1–5
-- Check answers
-
 Review matrices
-- Determinants
-- Inverses"></textarea>
+Read geography notes
+Draft film scene"></textarea>
       <div class="panel-actions">
         <button class="panel-action primary" id="saveTasksBtn" type="button">Start tasks</button>
         <button class="panel-action danger" id="clearTasksBtn" type="button">Clear</button>
       </div>
-      <div class="panel-note">Each normal line starts a task. Lines beginning with “-” become checklist items for the task above. Swipe left/right to move between tasks. Each task keeps its own timer.</div>
+      <div class="panel-note">One line = one task. Every task automatically has its own checkbox and timer. There are no subtasks. Swipe left/right to move through the same flat checklist.</div>
+    </section>
+
+    <section class="panel" id="messagePanel" aria-label="Lock in message editor">
+      <div class="panel-header"><div class="panel-title">EDIT LOCK IN</div><button class="panel-close" data-close-panel type="button">×</button></div>
+      <input id="messageInput" type="text" maxlength="120" placeholder="LOCK IN" autocomplete="off" />
+      <div class="panel-actions">
+        <button class="panel-action primary" id="saveMessageBtn" type="button">Save</button>
+      </div>
+      <div class="panel-note">This editor stays inside the clock. The fullscreen toggle is not attached to this panel.</div>
     </section>
 
     <section class="panel" id="audioPanel" aria-label="Soundtrack controls">
       <div class="panel-header"><div class="panel-title">SOUNDTRACK</div><button class="panel-close" data-close-panel type="button">×</button></div>
-      <input id="youtubeQuery" type="search" placeholder="Search YouTube…" autocomplete="off" />
-      <div class="panel-actions">
-        <button class="panel-action" id="youtubeSearchBtn" type="button">Search YouTube</button>
-      </div>
-      <input id="youtubeUrl" type="url" placeholder="Paste the YouTube video link here" style="margin-top:12px" />
+      <input id="youtubeUrl" type="url" placeholder="Paste a YouTube video link" />
       <div class="panel-actions">
         <button class="panel-action primary" id="youtubeLoadBtn" type="button">Play</button>
         <button class="panel-action" id="youtubeStopBtn" type="button">Stop</button>
+        <button class="panel-action danger" id="youtubeClearBtn" type="button">Clear</button>
       </div>
       <div class="yt-player-wrap" id="ytPlayerWrap"></div>
-      <div class="panel-note">YouTube requires its embedded player to remain visible during playback. Ads are controlled by YouTube and are not blocked by this clock. The clock stays usable behind this small player.</div>
+      <div class="audio-history">
+        <div class="audio-history-title">PREVIOUSLY HEARD</div>
+        <div class="audio-history-list" id="audioHistoryList"></div>
+      </div>
+      <div class="panel-note">History is saved on this device and shows video titles only. Tap a title to play it again.</div>
     </section>
   </main>
 
@@ -774,13 +878,16 @@ Review matrices
       const quickClearTasksBtn = document.getElementById('quickClearTasksBtn');
       const audioBtn = document.getElementById('audioBtn');
       const audioPanel = document.getElementById('audioPanel');
+      const messagePanel = document.getElementById('messagePanel');
+      const messageInput = document.getElementById('messageInput');
+      const saveMessageBtn = document.getElementById('saveMessageBtn');
       const panelBackdrop = document.getElementById('panelBackdrop');
-      const youtubeQuery = document.getElementById('youtubeQuery');
-      const youtubeSearchBtn = document.getElementById('youtubeSearchBtn');
       const youtubeUrl = document.getElementById('youtubeUrl');
       const youtubeLoadBtn = document.getElementById('youtubeLoadBtn');
       const youtubeStopBtn = document.getElementById('youtubeStopBtn');
+      const youtubeClearBtn = document.getElementById('youtubeClearBtn');
       const ytPlayerWrap = document.getElementById('ytPlayerWrap');
+      const audioHistoryList = document.getElementById('audioHistoryList');
 
       const cards = {
         hours: document.getElementById('hoursCard'),
@@ -1003,58 +1110,41 @@ Review matrices
         requestWakeLock({ quiet: true });
       }
 
-      // Desktop double-click anywhere on the black canvas, except the editable message.
+      // v7: fullscreen is deliberately strict. Only double-clicking the bare black
+      // app canvas itself can toggle fullscreen. No child UI can ever trigger it.
       app.addEventListener('dblclick', (event) => {
-        if (event.target.closest('.flip-card, .date, .message, .focus-row, .task-display, .task-counter, .panel, .panel-backdrop, button, input, textarea')) return;
+        if (!(event.target === app || event.target.classList?.contains('shell'))) return;
+        event.preventDefault();
         toggleFullscreen();
       });
 
       function beginMessageEdit(event) {
         event?.preventDefault();
         event?.stopPropagation();
-        message.setAttribute('contenteditable', 'true');
-        message.focus();
-
-        const range = document.createRange();
-        range.selectNodeContents(message);
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
+        messageInput.value = message.textContent.trim() || 'LOCK IN';
+        openPanel(messagePanel);
+        // No auto-focus: this avoids Safari scrolling/reframing fullscreen just
+        // because the editor opened. Tap the field only when you actually type.
       }
 
-      function finishMessageEdit(save = true) {
-        if (message.getAttribute('contenteditable') !== 'true') return;
-        message.removeAttribute('contenteditable');
-        const cleaned = message.textContent.replace(/\s+/g, ' ').trim();
+      function saveMessage() {
+        const cleaned = messageInput.value.replace(/\s+/g, ' ').trim();
         message.textContent = cleaned || 'LOCK IN';
-        if (save) localStorage.setItem('flipclock-message', message.textContent);
-        window.getSelection()?.removeAllRanges();
+        localStorage.setItem('flipclock-message', message.textContent);
+        closePanels();
+        showHint('Lock-in text saved');
       }
 
       message.addEventListener('dblclick', beginMessageEdit);
-      message.addEventListener('blur', () => finishMessageEdit(true));
-      message.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          finishMessageEdit(true);
-          message.blur();
-        }
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          const saved = localStorage.getItem('flipclock-message');
-          message.textContent = saved || 'LOCK IN';
-          finishMessageEdit(false);
-          message.blur();
-        }
-      });
 
-      // Touch support: two quick taps on background = fullscreen; two quick taps on message = edit.
+      // Touch support: two quick taps on the bare black canvas = fullscreen;
+      // two quick taps on LOCK IN = open its in-page editor.
       let lastBgTap = 0;
       let lastMsgTap = 0;
       const DOUBLE_TAP_MS = 320;
 
       app.addEventListener('touchend', (event) => {
-        if (event.target.closest('.flip-card, .date, .message, .focus-row, .task-display, .task-counter, .panel, .panel-backdrop, button, input, textarea')) return;
+        if (!(event.target === app || event.target.classList?.contains('shell'))) return;
         const now = Date.now();
         if (now - lastBgTap < DOUBLE_TAP_MS) {
           event.preventDefault();
@@ -1066,6 +1156,7 @@ Review matrices
       }, { passive: false });
 
       message.addEventListener('touchend', (event) => {
+        event.stopPropagation();
         const now = Date.now();
         if (now - lastMsgTap < DOUBLE_TAP_MS) {
           event.preventDefault();
@@ -1076,42 +1167,67 @@ Review matrices
         }
       }, { passive: false });
 
+      saveMessageBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        saveMessage();
+      });
+      messageInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          saveMessage();
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closePanels();
+        }
+      });
 
-      // ---------- Task mode v6 ----------
-      // A task owns its title, checklist state, and accumulated focus time.
+      // ---------- Task mode v7 ----------
+      // Flat checklist: each line is one task. Every task owns a checkbox and timer.
       let tasks = [];
-      let taskIndex = 0; // tasks.length is a valid special index = ALL DONE.
+      let taskIndex = 0; // tasks.length is the special ALL DONE page.
       let taskMode = false;
       let activeTimerStartedAt = null;
       let timerPaintInterval = null;
       let lastPersistAt = 0;
-      let suppressChecklistClickUntil = 0;
+      let suppressTaskCheckUntil = 0;
 
       function normalizeTask(raw) {
         if (typeof raw === 'string') {
-          return { title: raw.trim(), checklist: [], elapsedMs: 0 };
+          const title = raw.trim();
+          return title ? { title, done: false, elapsedMs: 0 } : null;
         }
         if (!raw || typeof raw !== 'object') return null;
         const title = String(raw.title || '').trim();
         if (!title) return null;
-        const checklist = Array.isArray(raw.checklist)
-          ? raw.checklist.map(item => {
-              if (typeof item === 'string') return { text: item.trim(), done: false };
-              if (!item || typeof item !== 'object') return null;
-              const text = String(item.text || '').trim();
-              return text ? { text, done: Boolean(item.done) } : null;
-            }).filter(Boolean)
-          : [];
         return {
           title,
-          checklist,
+          done: Boolean(raw.done),
           elapsedMs: Math.max(0, Number(raw.elapsedMs) || 0)
         };
       }
 
+      // Migrate v6's optional nested checklist into the new one-level model so
+      // nothing the user typed is silently lost.
+      function migrateSavedTasks(saved) {
+        const flat = [];
+        for (const raw of Array.isArray(saved) ? saved : []) {
+          const parent = normalizeTask(raw);
+          if (parent) flat.push(parent);
+          if (raw && typeof raw === 'object' && Array.isArray(raw.checklist)) {
+            for (const child of raw.checklist) {
+              const title = typeof child === 'string' ? child.trim() : String(child?.text || '').trim();
+              if (title) flat.push({ title, done: Boolean(child?.done), elapsedMs: 0 });
+            }
+          }
+        }
+        return flat;
+      }
+
       try {
         const savedTasks = JSON.parse(localStorage.getItem('flipclock-tasks') || '[]');
-        if (Array.isArray(savedTasks)) tasks = savedTasks.map(normalizeTask).filter(Boolean);
+        tasks = migrateSavedTasks(savedTasks);
         const savedIndex = Number(localStorage.getItem('flipclock-task-index') || 0);
         taskIndex = Math.max(0, Math.min(Number.isFinite(savedIndex) ? savedIndex : 0, tasks.length));
       } catch (_) {}
@@ -1119,7 +1235,7 @@ Review matrices
       function taskSnapshotForStorage() {
         return tasks.map((task, i) => ({
           title: task.title,
-          checklist: task.checklist.map(item => ({ text: item.text, done: item.done })),
+          done: Boolean(task.done),
           elapsedMs: Math.max(0, Math.round(task.elapsedMs + (
             activeTimerStartedAt !== null && i === taskIndex ? Date.now() - activeTimerStartedAt : 0
           )))
@@ -1161,9 +1277,7 @@ Review matrices
 
       function updateTaskTimerPaint() {
         const timer = taskDisplay.querySelector('[data-task-timer]');
-        if (timer && taskIndex < tasks.length) {
-          timer.textContent = formatElapsed(currentElapsedFor(taskIndex));
-        }
+        if (timer && taskIndex < tasks.length) timer.textContent = formatElapsed(currentElapsedFor(taskIndex));
         if (activeTimerStartedAt !== null && Date.now() - lastPersistAt > 5000) persistTasks();
       }
 
@@ -1174,7 +1288,7 @@ Review matrices
       ensureTimerPaintLoop();
 
       function escapeHtml(value) {
-        return String(value).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+        return String(value).replace(/[&<>\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]));
       }
 
       function renderTask() {
@@ -1193,22 +1307,14 @@ Review matrices
         }
 
         const task = tasks[taskIndex];
-        const remaining = Math.max(0, tasks.length - taskIndex);
-        const checklistHtml = task.checklist.length
-          ? `<div class="checklist">${task.checklist.map((item, i) => `
-              <button class="check-item${item.done ? ' checked' : ''}" type="button" data-check-index="${i}" aria-pressed="${item.done ? 'true' : 'false'}">
-                <span class="check-box" aria-hidden="true"></span>
-                <span class="check-label">${escapeHtml(item.text)}</span>
-              </button>`).join('')}</div>`
-          : '';
-
+        const unchecked = tasks.reduce((n, t) => n + (t.done ? 0 : 1), 0);
         taskDisplay.innerHTML = `
-          <div class="task-main-row">
-            <div class="task-title">${escapeHtml(task.title)}</div>
+          <div class="task-current">
+            <button class="task-current-check${task.done ? ' checked' : ''}" type="button" data-current-task-check aria-pressed="${task.done ? 'true' : 'false'}" aria-label="${task.done ? 'Mark task incomplete' : 'Mark task complete'}"></button>
+            <div class="task-title${task.done ? ' done' : ''}">${escapeHtml(task.title)}</div>
             <div class="task-timer" data-task-timer>${formatElapsed(currentElapsedFor(taskIndex))}</div>
-          </div>
-          ${checklistHtml}`;
-        taskCounter.textContent = `${remaining} LEFT`;
+          </div>`;
+        taskCounter.textContent = `${unchecked} UNCHECKED · ${taskIndex + 1}/${tasks.length}`;
       }
 
       function setTaskMode(on) {
@@ -1224,77 +1330,47 @@ Review matrices
       }
 
       function openPanel(panel) {
-        [taskPanel, audioPanel].forEach(p => p.classList.remove('open'));
+        [taskPanel, audioPanel, messagePanel].forEach(p => p.classList.remove('open'));
         panel.classList.add('open');
         panelBackdrop.classList.add('open');
+        document.documentElement.classList.add('panel-open');
       }
 
       function closePanels() {
         taskPanel.classList.remove('open');
         audioPanel.classList.remove('open');
+        messagePanel.classList.remove('open');
         panelBackdrop.classList.remove('open');
+        document.documentElement.classList.remove('panel-open');
       }
 
       function tasksToEditorText() {
-        return tasks.map(task => {
-          const lines = [task.title];
-          task.checklist.forEach(item => lines.push(`- ${item.text}`));
-          return lines.join('\n');
-        }).join('\n\n');
+        return tasks.map(task => task.title).join('\n');
       }
 
       function parseEditorTasks(value) {
-        const lines = String(value || '').split(/\r?\n/);
-        const parsed = [];
-        let current = null;
-
-        for (const rawLine of lines) {
-          const trimmed = rawLine.trim();
-          if (!trimmed) continue;
-          if (/^[-•]\s+/.test(trimmed)) {
-            if (!current) continue;
-            const text = trimmed.replace(/^[-•]\s+/, '').trim();
-            if (text) current.checklist.push({ text, done: false });
-          } else {
-            current = { title: trimmed, checklist: [], elapsedMs: 0 };
-            parsed.push(current);
-          }
-        }
-
-        // Preserve timers and checked checklist items when titles/items still match.
-        const oldByTitle = new Map(tasks.map(t => [t.title.trim().toLowerCase(), t]));
-        return parsed.map(task => {
-          const old = oldByTitle.get(task.title.toLowerCase());
-          if (!old) return task;
-          const doneByText = new Map(old.checklist.map(item => [item.text.trim().toLowerCase(), item.done]));
-          task.elapsedMs = currentElapsedFor(tasks.indexOf(old));
-          task.checklist = task.checklist.map(item => ({
-            text: item.text,
-            done: Boolean(doneByText.get(item.text.toLowerCase()))
-          }));
-          return task;
+        const titles = String(value || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+        const oldByTitle = new Map(tasks.map((t, i) => [t.title.trim().toLowerCase(), { task:t, index:i }]));
+        return titles.map(title => {
+          const old = oldByTitle.get(title.toLowerCase());
+          return old ? {
+            title,
+            done: Boolean(old.task.done),
+            elapsedMs: currentElapsedFor(old.index)
+          } : { title, done: false, elapsedMs: 0 };
         });
       }
 
       taskModeBtn.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
-
         if (!taskMode) {
-          if (tasks.length) {
-            // Preserve v5 behavior: TASK enters focus mode immediately when a queue exists.
-            setTaskMode(true);
-          } else {
-            taskInput.value = '';
-            openPanel(taskPanel);
-          }
+          if (tasks.length) setTaskMode(true);
+          else { taskInput.value = ''; openPanel(taskPanel); }
         } else {
-          // EDIT stays inside the current fullscreen document.
           taskInput.value = tasksToEditorText();
           openPanel(taskPanel);
         }
-        // Intentionally do not auto-focus. On iPad that can cause Safari to alter
-        // fullscreen presentation as the software keyboard opens.
       });
 
       saveTasksBtn.addEventListener('click', (event) => {
@@ -1307,7 +1383,7 @@ Review matrices
         closePanels();
         if (tasks.length) {
           setTaskMode(true);
-          showHint('Task mode started');
+          showHint('Task list saved');
         } else {
           setTaskMode(false);
           showHint('Add at least one task');
@@ -1328,31 +1404,23 @@ Review matrices
       }
 
       clearTasksBtn.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        clearAllTasks();
+        event.preventDefault(); event.stopPropagation(); clearAllTasks();
       });
       quickClearTasksBtn.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        clearAllTasks();
+        event.preventDefault(); event.stopPropagation(); clearAllTasks();
       });
 
       taskDisplay.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-check-index]');
-        if (!button || Date.now() < suppressChecklistClickUntil || taskIndex >= tasks.length) return;
+        const check = event.target.closest('[data-current-task-check]');
+        if (!check || Date.now() < suppressTaskCheckUntil || taskIndex >= tasks.length) return;
         event.preventDefault();
         event.stopPropagation();
-        const i = Number(button.dataset.checkIndex);
-        const item = tasks[taskIndex]?.checklist?.[i];
-        if (!item) return;
-        item.done = !item.done;
+        tasks[taskIndex].done = !tasks[taskIndex].done;
         persistTasks();
         renderTask();
       });
 
-      // Swipe through tasks. Left = next. Swiping left from the final task = ALL DONE.
-      // Right = previous. Swiping right from ALL DONE returns to the final task and resumes its timer.
+      // Left = next; right = previous. Past the final task = ALL DONE.
       let taskTouchStartX = null;
       let taskTouchStartY = null;
       let taskTouchDx = 0;
@@ -1360,10 +1428,7 @@ Review matrices
       function animateTaskChange(direction) {
         if (!tasks.length) return;
         const goingNext = direction === 'next';
-        const targetIndex = goingNext
-          ? Math.min(taskIndex + 1, tasks.length)
-          : Math.max(taskIndex - 1, 0);
-
+        const targetIndex = goingNext ? Math.min(taskIndex + 1, tasks.length) : Math.max(taskIndex - 1, 0);
         if (targetIndex === taskIndex) {
           taskDisplay.style.transform = '';
           taskDisplay.style.opacity = '';
@@ -1371,7 +1436,7 @@ Review matrices
         }
 
         pauseActiveTimer({ persist: false });
-        suppressChecklistClickUntil = Date.now() + 420;
+        suppressTaskCheckUntil = Date.now() + 420;
         taskDisplay.style.transform = '';
         taskDisplay.style.opacity = '';
         taskDisplay.classList.add(goingNext ? 'next' : 'prev');
@@ -1400,7 +1465,7 @@ Review matrices
         taskTouchStartY = t.clientY;
         taskTouchDx = 0;
         taskDisplay.classList.add('swiping');
-      }, {passive:true});
+      }, { passive: true });
 
       taskDisplay.addEventListener('touchmove', (e) => {
         if (taskTouchStartX === null) return;
@@ -1408,11 +1473,12 @@ Review matrices
         const dx = t.clientX - taskTouchStartX;
         const dy = t.clientY - taskTouchStartY;
         if (Math.abs(dx) > Math.abs(dy)) {
+          e.preventDefault();
           taskTouchDx = Math.max(-100, Math.min(100, dx));
           taskDisplay.style.transform = `translateX(${taskTouchDx * .34}px)`;
           taskDisplay.style.opacity = String(Math.max(.58, 1 - Math.abs(taskTouchDx) / 245));
         }
-      }, {passive:true});
+      }, { passive: false });
 
       taskDisplay.addEventListener('touchend', (e) => {
         if (taskTouchStartX === null) return;
@@ -1421,31 +1487,24 @@ Review matrices
         const dy = t.clientY - taskTouchStartY;
         taskTouchStartX = taskTouchStartY = null;
         taskDisplay.classList.remove('swiping');
-
         const isHorizontalSwipe = Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.15;
-        if (isHorizontalSwipe) {
-          animateTaskChange(dx < 0 ? 'next' : 'prev');
-        } else {
-          taskDisplay.style.transform = '';
-          taskDisplay.style.opacity = '';
-        }
-      }, {passive:true});
+        if (isHorizontalSwipe) animateTaskChange(dx < 0 ? 'next' : 'prev');
+        else { taskDisplay.style.transform = ''; taskDisplay.style.opacity = ''; }
+      }, { passive: true });
 
       taskDisplay.addEventListener('dblclick', (event) => {
-        if (event.target.closest('[data-check-index]')) return;
+        if (event.target.closest('[data-current-task-check]')) return;
         if (!taskMode || !tasks.length) return;
         animateTaskChange('next');
       });
 
-      // The timer represents active focus time, so pause while the app is hidden and
-      // automatically resume the same task when the clock becomes visible again.
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') pauseActiveTimer({ persist: true });
         else resumeActiveTimer();
       });
       window.addEventListener('pagehide', () => pauseActiveTimer({ persist: true }));
 
-      // ---------- Soundtrack ----------
+      // ---------- Soundtrack v7 ----------
       function extractYouTubeId(value) {
         const raw = (value || '').trim();
         if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
@@ -1456,63 +1515,176 @@ Review matrices
             if (u.pathname === '/watch') return u.searchParams.get('v');
             const parts = u.pathname.split('/').filter(Boolean);
             const i = parts.findIndex(x => ['embed','shorts','live'].includes(x));
-            if (i >= 0) return parts[i+1] || null;
+            if (i >= 0) return parts[i + 1] || null;
           }
         } catch (_) {}
         return null;
       }
 
+      let youtubeHistory = [];
+      try {
+        const parsed = JSON.parse(localStorage.getItem('flipclock-youtube-history') || '[]');
+        if (Array.isArray(parsed)) {
+          youtubeHistory = parsed.filter(x => x && x.id && x.title).slice(0, 20);
+        }
+      } catch (_) {}
+
+      function persistYouTubeHistory() {
+        localStorage.setItem('flipclock-youtube-history', JSON.stringify(youtubeHistory.slice(0, 20)));
+      }
+
+      function renderYouTubeHistory() {
+        if (!youtubeHistory.length) {
+          audioHistoryList.innerHTML = '<div class="audio-history-empty">Nothing played yet.</div>';
+          return;
+        }
+        audioHistoryList.innerHTML = youtubeHistory.map((item, i) =>
+          `<button type="button" class="audio-history-item" data-history-index="${i}" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</button>`
+        ).join('');
+      }
+
+      function rememberYouTube(id, title) {
+        const cleanTitle = String(title || '').trim();
+        if (!id || !cleanTitle || cleanTitle === 'YouTube video player') return;
+        youtubeHistory = youtubeHistory.filter(x => x.id !== id);
+        youtubeHistory.unshift({ id, title: cleanTitle });
+        youtubeHistory = youtubeHistory.slice(0, 20);
+        persistYouTubeHistory();
+        renderYouTubeHistory();
+      }
+
+      function captureIframeTitle(id, iframe) {
+        // The IFrame API isn't required just to play. The iframe's title may be
+        // updated by YouTube after load; poll briefly and cache a real title when available.
+        let tries = 0;
+        const timer = setInterval(() => {
+          tries += 1;
+          const title = iframe?.getAttribute('title') || '';
+          if (title && title !== 'YouTube soundtrack' && title !== 'YouTube video player') {
+            rememberYouTube(id, title);
+            clearInterval(timer);
+          } else if (tries >= 12) {
+            clearInterval(timer);
+          }
+        }, 700);
+      }
+
+      async function fetchYouTubeTitle(id) {
+        // oEmbed needs no API key and is used only to obtain the human-readable title.
+        try {
+          const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${id}`)}&format=json`;
+          const response = await fetch(endpoint, { mode: 'cors' });
+          if (!response.ok) return null;
+          const data = await response.json();
+          return data?.title ? String(data.title) : null;
+        } catch (_) { return null; }
+      }
+
+      async function playYouTubeId(id, sourceUrl = '') {
+        if (!id) { showHint('Paste a valid YouTube link'); return; }
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0`;
+        iframe.title = 'YouTube soundtrack';
+        iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.setAttribute('allowfullscreen', '');
+        ytPlayerWrap.replaceChildren(iframe);
+        ytPlayerWrap.classList.add('active');
+        audioBtn.classList.add('active');
+        if (sourceUrl) {
+          youtubeUrl.value = sourceUrl;
+          localStorage.setItem('flipclock-youtube-url', sourceUrl);
+        }
+
+        const known = youtubeHistory.find(x => x.id === id);
+        if (known) rememberYouTube(id, known.title);
+        else {
+          const title = await fetchYouTubeTitle(id);
+          if (title) rememberYouTube(id, title);
+          else captureIframeTitle(id, iframe);
+        }
+      }
+
       audioBtn.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
+        renderYouTubeHistory();
         openPanel(audioPanel);
-        // Do not auto-focus the search field on iPad. Opening the software keyboard
-        // during fullscreen can make Safari alter its fullscreen presentation.
       });
 
-      youtubeSearchBtn.addEventListener('click', () => {
-        const q = youtubeQuery.value.trim();
-        if (!q) return;
-        if (isDisplayFullscreen()) {
-          // Leaving for YouTube would force iPadOS out of fullscreen. Keep the clock
-          // fullscreen instead and let the user paste a video URL in the field below.
-          youtubeUrl.focus();
-          showHint('Fullscreen kept on — paste a YouTube link below');
-          return;
-        }
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, '_blank');
-        showHint('Choose a video, then paste its link');
+      youtubeLoadBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const raw = youtubeUrl.value.trim();
+        const id = extractYouTubeId(raw);
+        playYouTubeId(id, raw);
       });
 
-      youtubeQuery.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); youtubeSearchBtn.click(); }
-      });
-
-      youtubeLoadBtn.addEventListener('click', () => {
-        const id = extractYouTubeId(youtubeUrl.value);
-        if (!id) { showHint('Paste a valid YouTube link'); return; }
-        ytPlayerWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0" title="YouTube soundtrack" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-        ytPlayerWrap.classList.add('active');
-        audioBtn.classList.add('active');
-        localStorage.setItem('flipclock-youtube-url', youtubeUrl.value.trim());
-      });
-
-      youtubeStopBtn.addEventListener('click', () => {
-        ytPlayerWrap.innerHTML = '';
+      youtubeStopBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        ytPlayerWrap.replaceChildren();
         ytPlayerWrap.classList.remove('active');
         audioBtn.classList.remove('active');
       });
 
+      youtubeClearBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        youtubeUrl.value = '';
+        localStorage.removeItem('flipclock-youtube-url');
+        ytPlayerWrap.replaceChildren();
+        ytPlayerWrap.classList.remove('active');
+        audioBtn.classList.remove('active');
+        showHint('Soundtrack cleared');
+      });
+
+      audioHistoryList.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-history-index]');
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const item = youtubeHistory[Number(button.dataset.historyIndex)];
+        if (!item) return;
+        const url = `https://www.youtube.com/watch?v=${item.id}`;
+        playYouTubeId(item.id, url);
+      });
+
       const savedYoutube = localStorage.getItem('flipclock-youtube-url');
       if (savedYoutube) youtubeUrl.value = savedYoutube;
+      renderYouTubeHistory();
 
       panelBackdrop.addEventListener('click', closePanels);
       document.querySelectorAll('[data-close-panel]').forEach(btn => btn.addEventListener('click', closePanels));
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanels(); });
 
-      // Prevent accidental browser selection/context menu on the clock face.
+      // Keep vertical gestures inside panels from leaking to the fullscreen viewport.
+      // In particular, suppress rubber-band swipes when a panel is already at its top/bottom.
+      function installPanelScrollContainment(panel) {
+        let startY = null;
+        panel.addEventListener('touchstart', (event) => {
+          startY = event.touches[0]?.clientY ?? null;
+          event.stopPropagation();
+        }, { passive: true });
+        panel.addEventListener('touchmove', (event) => {
+          event.stopPropagation();
+          if (startY === null) return;
+          const y = event.touches[0]?.clientY ?? startY;
+          const dy = y - startY;
+          const target = event.target.closest('textarea, .audio-history-list, .panel') || panel;
+          const canScroll = target.scrollHeight > target.clientHeight + 1;
+          const atTop = target.scrollTop <= 0;
+          const atBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 1;
+          if (!canScroll || (atTop && dy > 0) || (atBottom && dy < 0)) event.preventDefault();
+        }, { passive: false });
+        panel.addEventListener('touchend', (event) => { startY = null; event.stopPropagation(); }, { passive: true });
+      }
+      [taskPanel, audioPanel, messagePanel].forEach(installPanelScrollContainment);
+      panelBackdrop.addEventListener('touchmove', event => event.preventDefault(), { passive: false });
+
+      // Prevent accidental selection/context menus on the clock face; form fields remain normal.
       app.addEventListener('contextmenu', (event) => {
-        if (message.getAttribute('contenteditable') !== 'true') event.preventDefault();
+        if (!event.target.closest('input, textarea')) event.preventDefault();
       });
     })();
   </script>
