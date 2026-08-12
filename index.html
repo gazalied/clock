@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="format-detection" content="telephone=no" />
-  <title>Lock In Flip Clock</title>
+  <title>Lock In Flip Clock v5</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Roboto+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -547,12 +547,14 @@
     .yt-player-wrap iframe { display:block; width:100%; height:200px; border:0; }
 
     .task-swipe-hint {
-      opacity:0;
+      opacity:1;
       transform:translateX(0);
       transition: opacity 140ms ease, transform 180ms ease;
+      will-change: transform, opacity;
     }
-    .task-swipe-hint.swiping { opacity:.55; }
-    .task-swipe-hint.done { opacity:0; transform:translateX(-36px); }
+    .task-swipe-hint.swiping { opacity:.72; transition: none; }
+    .task-swipe-hint.next { opacity:0; transform:translateX(-44px); }
+    .task-swipe-hint.prev { opacity:0; transform:translateX(44px); }
 
     @media (max-width: 760px) {
       .focus-row { margin-top: clamp(30px, 5vh, 48px); gap: 4px; }
@@ -590,7 +592,7 @@
         <div class="message" id="message" title="Double-click to edit">LOCK IN</div>
         <button class="mode-btn" id="taskModeBtn" type="button" aria-label="Switch to task mode">TASK</button>
       </div>
-      <div class="task-display task-swipe-hint" id="taskDisplay" title="Swipe left when done"></div>
+      <div class="task-display task-swipe-hint" id="taskDisplay" title="Swipe left for next task, right for previous"></div>
       <div class="task-counter" id="taskCounter"></div>
     </section>
 
@@ -607,7 +609,7 @@ Write film scene"></textarea>
         <button class="panel-action primary" id="saveTasksBtn" type="button">Start tasks</button>
         <button class="panel-action" id="clearTasksBtn" type="button">Clear</button>
       </div>
-      <div class="panel-note">Swipe the large task text left when you finish it. The next task will take its place.</div>
+      <div class="panel-note">Swipe left for the next task, or swipe right to go back to the previous task.</div>
     </section>
 
     <section class="panel" id="audioPanel" aria-label="Soundtrack controls">
@@ -874,7 +876,7 @@ Write film scene"></textarea>
 
       // Desktop double-click anywhere on the black canvas, except the editable message.
       app.addEventListener('dblclick', (event) => {
-        if (event.target.closest('.flip-card, .date, .message')) return;
+        if (event.target.closest('.flip-card, .date, .message, .focus-row, .task-display, .task-counter, .panel, .panel-backdrop, button, input, textarea')) return;
         toggleFullscreen();
       });
 
@@ -923,7 +925,7 @@ Write film scene"></textarea>
       const DOUBLE_TAP_MS = 320;
 
       app.addEventListener('touchend', (event) => {
-        if (event.target.closest('.flip-card, .date, .message')) return;
+        if (event.target.closest('.flip-card, .date, .message, .focus-row, .task-display, .task-counter, .panel, .panel-backdrop, button, input, textarea')) return;
         const now = Date.now();
         if (now - lastBgTap < DOUBLE_TAP_MS) {
           event.preventDefault();
@@ -1029,15 +1031,66 @@ Write film scene"></textarea>
         renderTask();
       });
 
-      // Swipe left on the large task to complete it and advance.
+      // Swipe through tasks in either direction. Left = next, right = previous.
       let taskTouchStartX = null;
       let taskTouchStartY = null;
+      let taskTouchDx = 0;
+
+      function animateTaskChange(direction) {
+        if (!tasks.length) return;
+        const goingNext = direction === 'next';
+        const targetIndex = goingNext
+          ? Math.min(taskIndex + 1, tasks.length - 1)
+          : Math.max(taskIndex - 1, 0);
+
+        // At either end, softly snap back instead of disappearing.
+        if (targetIndex === taskIndex) {
+          taskDisplay.style.transform = '';
+          taskDisplay.style.opacity = '';
+          return;
+        }
+
+        taskDisplay.style.transform = '';
+        taskDisplay.style.opacity = '';
+        taskDisplay.classList.add(goingNext ? 'next' : 'prev');
+        setTimeout(() => {
+          taskIndex = targetIndex;
+          persistTasks();
+          renderTask();
+          taskDisplay.classList.remove('next', 'prev');
+          // Bring the new task in from the opposite side.
+          taskDisplay.style.transition = 'none';
+          taskDisplay.style.transform = `translateX(${goingNext ? '34px' : '-34px'})`;
+          taskDisplay.style.opacity = '0';
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            taskDisplay.style.transition = '';
+            taskDisplay.style.transform = '';
+            taskDisplay.style.opacity = '';
+          }));
+        }, 145);
+      }
+
       taskDisplay.addEventListener('touchstart', (e) => {
+        if (!taskMode || !tasks.length) return;
         const t = e.changedTouches[0];
         taskTouchStartX = t.clientX;
         taskTouchStartY = t.clientY;
+        taskTouchDx = 0;
         taskDisplay.classList.add('swiping');
       }, {passive:true});
+
+      taskDisplay.addEventListener('touchmove', (e) => {
+        if (taskTouchStartX === null) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - taskTouchStartX;
+        const dy = t.clientY - taskTouchStartY;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          taskTouchDx = Math.max(-90, Math.min(90, dx));
+          taskDisplay.style.transform = `translateX(${taskTouchDx * .35}px)`;
+          taskDisplay.style.opacity = String(Math.max(.58, 1 - Math.abs(taskTouchDx) / 240));
+        }
+      }, {passive:true});
+
       taskDisplay.addEventListener('touchend', (e) => {
         if (taskTouchStartX === null) return;
         const t = e.changedTouches[0];
@@ -1045,23 +1098,20 @@ Write film scene"></textarea>
         const dy = t.clientY - taskTouchStartY;
         taskTouchStartX = taskTouchStartY = null;
         taskDisplay.classList.remove('swiping');
-        if (dx < -70 && Math.abs(dx) > Math.abs(dy) * 1.25) {
-          taskDisplay.classList.add('done');
-          setTimeout(() => {
-            taskDisplay.classList.remove('done');
-            if (taskIndex < tasks.length) taskIndex += 1;
-            persistTasks();
-            renderTask();
-          }, 150);
+
+        const isHorizontalSwipe = Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.15;
+        if (isHorizontalSwipe) {
+          animateTaskChange(dx < 0 ? 'next' : 'prev');
+        } else {
+          taskDisplay.style.transform = '';
+          taskDisplay.style.opacity = '';
         }
       }, {passive:true});
 
       // Desktop convenience: double-click the task to mark it complete.
       taskDisplay.addEventListener('dblclick', () => {
-        if (!taskMode || taskIndex >= tasks.length) return;
-        taskIndex += 1;
-        persistTasks();
-        renderTask();
+        if (!taskMode || !tasks.length || taskIndex >= tasks.length - 1) return;
+        animateTaskChange('next');
       });
 
       // ---------- Soundtrack ----------
@@ -1081,14 +1131,24 @@ Write film scene"></textarea>
         return null;
       }
 
-      audioBtn.addEventListener('click', () => {
+      audioBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         openPanel(audioPanel);
-        setTimeout(() => youtubeQuery.focus(), 220);
+        // Do not auto-focus the search field on iPad. Opening the software keyboard
+        // during fullscreen can make Safari alter its fullscreen presentation.
       });
 
       youtubeSearchBtn.addEventListener('click', () => {
         const q = youtubeQuery.value.trim();
         if (!q) return;
+        if (isDisplayFullscreen()) {
+          // Leaving for YouTube would force iPadOS out of fullscreen. Keep the clock
+          // fullscreen instead and let the user paste a video URL in the field below.
+          youtubeUrl.focus();
+          showHint('Fullscreen kept on — paste a YouTube link below');
+          return;
+        }
         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, '_blank');
         showHint('Choose a video, then paste its link');
       });
