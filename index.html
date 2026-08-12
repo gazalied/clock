@@ -396,6 +396,170 @@
       .flip-card.flipping .flip-layer.top::before,
       .flip-card.flipping .flip-layer.bottom::before { animation-duration: 1ms; animation-delay: 0ms; }
     }
+
+
+    /* v4 — subtle focus controls */
+    .focus-row {
+      margin-top: clamp(42px, 7vh, 90px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      max-width: min(92vw, 980px);
+    }
+
+    .focus-row .message { margin-top: 0; }
+
+    .mode-btn,
+    .audio-btn {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: rgba(255,255,255,.31);
+      font-family: "Inter Tight", Inter, sans-serif;
+      font-size: clamp(10px, .9vw, 13px);
+      font-weight: 500;
+      letter-spacing: .1em;
+      padding: 9px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 160ms ease, background 160ms ease;
+      white-space: nowrap;
+    }
+
+    .mode-btn:hover, .audio-btn:hover,
+    .mode-btn.active, .audio-btn.active {
+      color: rgba(255,255,255,.72);
+      background: rgba(255,255,255,.055);
+    }
+
+    .task-display {
+      margin-top: clamp(34px, 5.5vh, 68px);
+      width: min(94vw, 1080px);
+      min-height: 1.25em;
+      padding: 10px 22px;
+      color: #d8d8d8;
+      font-family: "Inter Tight", Inter, sans-serif;
+      font-size: clamp(32px, 5.2vw, 76px);
+      line-height: 1.05;
+      font-weight: 500;
+      letter-spacing: -.035em;
+      text-align: center;
+      overflow-wrap: anywhere;
+      touch-action: pan-y;
+      cursor: default;
+      display: none;
+    }
+
+    .task-display.active { display: block; }
+    .focus-row.task-mode .message { display: none; }
+    .focus-row.task-mode { margin-top: clamp(18px, 3vh, 34px); }
+
+    .task-counter {
+      display: none;
+      margin-top: 12px;
+      color: rgba(255,255,255,.28);
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+    .task-counter.active { display: block; }
+
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.58);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+      z-index: 90;
+    }
+    .panel-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .panel {
+      position: fixed;
+      left: 50%;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      width: min(92vw, 620px);
+      transform: translate(-50%, calc(100% + 48px));
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 24px;
+      background: rgba(18,18,18,.97);
+      box-shadow: 0 28px 90px rgba(0,0,0,.58);
+      padding: 20px;
+      z-index: 100;
+      transition: transform 220ms cubic-bezier(.2,.8,.2,1);
+    }
+    .panel.open { transform: translate(-50%, 0); }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-size: 14px;
+      color: rgba(255,255,255,.72);
+      letter-spacing: .04em;
+      font-weight: 500;
+    }
+    .panel-close {
+      appearance:none; border:0; background:rgba(255,255,255,.06); color:#aaa;
+      width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px;
+    }
+
+    .panel textarea,
+    .panel input {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.045);
+      color: #ddd;
+      border-radius: 14px;
+      outline: none;
+      font: 400 15px/1.45 "Inter Tight", Inter, sans-serif;
+      padding: 12px 14px;
+    }
+    .panel textarea { min-height: 130px; resize: vertical; }
+    .panel textarea:focus, .panel input:focus { border-color: rgba(255,255,255,.24); }
+
+    .panel-actions { display:flex; gap:9px; margin-top:12px; flex-wrap:wrap; }
+    .panel-action {
+      appearance:none; border:0; border-radius:999px; padding:10px 14px;
+      background:rgba(255,255,255,.09); color:#cfcfcf; cursor:pointer;
+      font:500 13px "Inter Tight", Inter, sans-serif;
+    }
+    .panel-action.primary { background:#e0e0e0; color:#101010; }
+    .panel-note { color:rgba(255,255,255,.36); font-size:11px; line-height:1.45; margin-top:10px; }
+
+    .yt-player-wrap {
+      width: 100%;
+      min-height: 200px;
+      margin-top: 14px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000;
+      display: none;
+    }
+    .yt-player-wrap.active { display:block; }
+    .yt-player-wrap iframe { display:block; width:100%; height:200px; border:0; }
+
+    .task-swipe-hint {
+      opacity:0;
+      transform:translateX(0);
+      transition: opacity 140ms ease, transform 180ms ease;
+    }
+    .task-swipe-hint.swiping { opacity:.55; }
+    .task-swipe-hint.done { opacity:0; transform:translateX(-36px); }
+
+    @media (max-width: 760px) {
+      .focus-row { margin-top: clamp(30px, 5vh, 48px); gap: 4px; }
+      .task-display { font-size: clamp(28px, 9vw, 54px); padding-inline: 10px; }
+      .panel { border-radius: 20px; padding: 16px; }
+    }
+
   </style>
 </head>
 <body>
@@ -421,10 +585,45 @@
         </div>
       </div>
 
-      <div class="message" id="message" title="Double-click to edit">LOCK IN</div>
+      <div class="focus-row" id="focusRow">
+        <button class="audio-btn" id="audioBtn" type="button" aria-label="Open soundtrack controls">♫</button>
+        <div class="message" id="message" title="Double-click to edit">LOCK IN</div>
+        <button class="mode-btn" id="taskModeBtn" type="button" aria-label="Switch to task mode">TASK</button>
+      </div>
+      <div class="task-display task-swipe-hint" id="taskDisplay" title="Swipe left when done"></div>
+      <div class="task-counter" id="taskCounter"></div>
     </section>
 
     <div class="hint" id="hint"></div>
+
+    <div class="panel-backdrop" id="panelBackdrop"></div>
+    <section class="panel" id="taskPanel" aria-label="Task list editor">
+      <div class="panel-header"><div class="panel-title">TASK MODE</div><button class="panel-close" data-close-panel type="button">×</button></div>
+      <textarea id="taskInput" placeholder="One task per line
+Finish chemistry worksheet
+Review matrices
+Write film scene"></textarea>
+      <div class="panel-actions">
+        <button class="panel-action primary" id="saveTasksBtn" type="button">Start tasks</button>
+        <button class="panel-action" id="clearTasksBtn" type="button">Clear</button>
+      </div>
+      <div class="panel-note">Swipe the large task text left when you finish it. The next task will take its place.</div>
+    </section>
+
+    <section class="panel" id="audioPanel" aria-label="Soundtrack controls">
+      <div class="panel-header"><div class="panel-title">SOUNDTRACK</div><button class="panel-close" data-close-panel type="button">×</button></div>
+      <input id="youtubeQuery" type="search" placeholder="Search YouTube…" autocomplete="off" />
+      <div class="panel-actions">
+        <button class="panel-action" id="youtubeSearchBtn" type="button">Search YouTube</button>
+      </div>
+      <input id="youtubeUrl" type="url" placeholder="Paste the YouTube video link here" style="margin-top:12px" />
+      <div class="panel-actions">
+        <button class="panel-action primary" id="youtubeLoadBtn" type="button">Play</button>
+        <button class="panel-action" id="youtubeStopBtn" type="button">Stop</button>
+      </div>
+      <div class="yt-player-wrap" id="ytPlayerWrap"></div>
+      <div class="panel-note">YouTube requires its embedded player to remain visible during playback. The clock stays usable behind this small player.</div>
+    </section>
   </main>
 
   <script>
@@ -434,6 +633,23 @@
       const meridiem = document.getElementById('meridiem');
       const message = document.getElementById('message');
       const hint = document.getElementById('hint');
+      const focusRow = document.getElementById('focusRow');
+      const taskModeBtn = document.getElementById('taskModeBtn');
+      const taskDisplay = document.getElementById('taskDisplay');
+      const taskCounter = document.getElementById('taskCounter');
+      const taskPanel = document.getElementById('taskPanel');
+      const taskInput = document.getElementById('taskInput');
+      const saveTasksBtn = document.getElementById('saveTasksBtn');
+      const clearTasksBtn = document.getElementById('clearTasksBtn');
+      const audioBtn = document.getElementById('audioBtn');
+      const audioPanel = document.getElementById('audioPanel');
+      const panelBackdrop = document.getElementById('panelBackdrop');
+      const youtubeQuery = document.getElementById('youtubeQuery');
+      const youtubeSearchBtn = document.getElementById('youtubeSearchBtn');
+      const youtubeUrl = document.getElementById('youtubeUrl');
+      const youtubeLoadBtn = document.getElementById('youtubeLoadBtn');
+      const youtubeStopBtn = document.getElementById('youtubeStopBtn');
+      const ytPlayerWrap = document.getElementById('ytPlayerWrap');
 
       const cards = {
         hours: document.getElementById('hoursCard'),
@@ -728,6 +944,180 @@
           lastMsgTap = now;
         }
       }, { passive: false });
+
+
+      // ---------- Task mode ----------
+      let tasks = [];
+      let taskIndex = 0;
+      let taskMode = false;
+
+      try {
+        const savedTasks = JSON.parse(localStorage.getItem('flipclock-tasks') || '[]');
+        if (Array.isArray(savedTasks)) tasks = savedTasks.filter(Boolean);
+        taskIndex = Math.min(Number(localStorage.getItem('flipclock-task-index') || 0), Math.max(0, tasks.length - 1));
+      } catch (_) {}
+
+      function persistTasks() {
+        localStorage.setItem('flipclock-tasks', JSON.stringify(tasks));
+        localStorage.setItem('flipclock-task-index', String(taskIndex));
+      }
+
+      function renderTask() {
+        const remaining = Math.max(0, tasks.length - taskIndex);
+        if (!tasks.length || taskIndex >= tasks.length) {
+          taskDisplay.textContent = tasks.length ? 'ALL DONE' : 'ADD YOUR TASKS';
+          taskCounter.textContent = tasks.length ? '0 LEFT' : '';
+          return;
+        }
+        taskDisplay.textContent = tasks[taskIndex];
+        taskCounter.textContent = `${remaining} LEFT`;
+      }
+
+      function setTaskMode(on) {
+        taskMode = on;
+        focusRow.classList.toggle('task-mode', on);
+        taskDisplay.classList.toggle('active', on);
+        taskCounter.classList.toggle('active', on);
+        taskModeBtn.classList.toggle('active', on);
+        taskModeBtn.textContent = on ? 'EDIT' : 'TASK';
+        renderTask();
+      }
+
+      function openPanel(panel) {
+        [taskPanel, audioPanel].forEach(p => p.classList.remove('open'));
+        panel.classList.add('open');
+        panelBackdrop.classList.add('open');
+      }
+
+      function closePanels() {
+        taskPanel.classList.remove('open');
+        audioPanel.classList.remove('open');
+        panelBackdrop.classList.remove('open');
+      }
+
+      taskModeBtn.addEventListener('click', () => {
+        if (!taskMode) {
+          if (!tasks.length) {
+            taskInput.value = '';
+            openPanel(taskPanel);
+            setTimeout(() => taskInput.focus(), 220);
+          } else {
+            setTaskMode(true);
+          }
+        } else {
+          taskInput.value = tasks.slice(taskIndex).join('\n');
+          openPanel(taskPanel);
+          setTimeout(() => taskInput.focus(), 220);
+        }
+      });
+
+      saveTasksBtn.addEventListener('click', () => {
+        tasks = taskInput.value.split(/\n+/).map(t => t.trim()).filter(Boolean);
+        taskIndex = 0;
+        persistTasks();
+        renderTask();
+        setTaskMode(true);
+        closePanels();
+        showHint(tasks.length ? 'Task mode started' : 'Add at least one task');
+      });
+
+      clearTasksBtn.addEventListener('click', () => {
+        tasks = [];
+        taskIndex = 0;
+        persistTasks();
+        taskInput.value = '';
+        renderTask();
+      });
+
+      // Swipe left on the large task to complete it and advance.
+      let taskTouchStartX = null;
+      let taskTouchStartY = null;
+      taskDisplay.addEventListener('touchstart', (e) => {
+        const t = e.changedTouches[0];
+        taskTouchStartX = t.clientX;
+        taskTouchStartY = t.clientY;
+        taskDisplay.classList.add('swiping');
+      }, {passive:true});
+      taskDisplay.addEventListener('touchend', (e) => {
+        if (taskTouchStartX === null) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - taskTouchStartX;
+        const dy = t.clientY - taskTouchStartY;
+        taskTouchStartX = taskTouchStartY = null;
+        taskDisplay.classList.remove('swiping');
+        if (dx < -70 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+          taskDisplay.classList.add('done');
+          setTimeout(() => {
+            taskDisplay.classList.remove('done');
+            if (taskIndex < tasks.length) taskIndex += 1;
+            persistTasks();
+            renderTask();
+          }, 150);
+        }
+      }, {passive:true});
+
+      // Desktop convenience: double-click the task to mark it complete.
+      taskDisplay.addEventListener('dblclick', () => {
+        if (!taskMode || taskIndex >= tasks.length) return;
+        taskIndex += 1;
+        persistTasks();
+        renderTask();
+      });
+
+      // ---------- Soundtrack ----------
+      function extractYouTubeId(value) {
+        const raw = (value || '').trim();
+        if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+        try {
+          const u = new URL(raw);
+          if (u.hostname.includes('youtu.be')) return u.pathname.split('/').filter(Boolean)[0] || null;
+          if (u.hostname.includes('youtube.com')) {
+            if (u.pathname === '/watch') return u.searchParams.get('v');
+            const parts = u.pathname.split('/').filter(Boolean);
+            const i = parts.findIndex(x => ['embed','shorts','live'].includes(x));
+            if (i >= 0) return parts[i+1] || null;
+          }
+        } catch (_) {}
+        return null;
+      }
+
+      audioBtn.addEventListener('click', () => {
+        openPanel(audioPanel);
+        setTimeout(() => youtubeQuery.focus(), 220);
+      });
+
+      youtubeSearchBtn.addEventListener('click', () => {
+        const q = youtubeQuery.value.trim();
+        if (!q) return;
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, '_blank');
+        showHint('Choose a video, then paste its link');
+      });
+
+      youtubeQuery.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); youtubeSearchBtn.click(); }
+      });
+
+      youtubeLoadBtn.addEventListener('click', () => {
+        const id = extractYouTubeId(youtubeUrl.value);
+        if (!id) { showHint('Paste a valid YouTube link'); return; }
+        ytPlayerWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0" title="YouTube soundtrack" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+        ytPlayerWrap.classList.add('active');
+        audioBtn.classList.add('active');
+        localStorage.setItem('flipclock-youtube-url', youtubeUrl.value.trim());
+      });
+
+      youtubeStopBtn.addEventListener('click', () => {
+        ytPlayerWrap.innerHTML = '';
+        ytPlayerWrap.classList.remove('active');
+        audioBtn.classList.remove('active');
+      });
+
+      const savedYoutube = localStorage.getItem('flipclock-youtube-url');
+      if (savedYoutube) youtubeUrl.value = savedYoutube;
+
+      panelBackdrop.addEventListener('click', closePanels);
+      document.querySelectorAll('[data-close-panel]').forEach(btn => btn.addEventListener('click', closePanels));
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanels(); });
 
       // Prevent accidental browser selection/context menu on the clock face.
       app.addEventListener('contextmenu', (event) => {
