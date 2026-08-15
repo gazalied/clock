@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="format-detection" content="telephone=no" />
-  <title>Lock In Flip Clock v7</title>
+  <title>Lock In Flip Clock v8</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Roboto+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -63,7 +66,7 @@
     }
 
     .shell {
-      width: min(1180px, 92vw);
+      width: min(1110px, 90vw);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -173,7 +176,7 @@
     .digit {
       display: block;
       font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
-      font-size: clamp(88px, 22.4vw, 286px);
+      font-size: clamp(82px, 20.8vw, 270px);
       line-height: 0.88;
       font-weight: 600;
       letter-spacing: -0.052em;
@@ -783,6 +786,88 @@
       .panel textarea { min-height: min(42svh, 300px); }
     }
 
+
+    /* ---------------- v8: hierarchy, task overview, iPad-safe panels ---------------- */
+    .panel, .panel * { -webkit-tap-highlight-color: transparent; }
+    .panel { max-height: min(84svh, 780px); overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+    .panel input, .panel textarea, .panel button, .panel select { touch-action: manipulation; }
+    .panel textarea, .panel input { user-select: text; -webkit-user-select: text; }
+
+    .paste-task-btn { display:inline-flex; }
+    .panel-actions.compact { justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .panel-actions-left, .panel-actions-right { display:flex; gap:8px; flex-wrap:wrap; }
+
+    .task-context {
+      display:none;
+      max-width:min(900px,88vw);
+      margin-top:10px;
+      color:rgba(255,255,255,.36);
+      font-size:clamp(11px,1.15vw,14px);
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      text-align:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .task-context.active { display:block; }
+    .task-context span { color:rgba(255,255,255,.52); }
+
+    .task-counter { cursor:pointer; pointer-events:auto; }
+    .task-counter:hover { color:rgba(255,255,255,.7); }
+    .all-done-title { cursor:pointer; }
+
+    .task-overview-toolbar {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin:4px 0 12px;
+    }
+    .task-overview-stats { color:rgba(255,255,255,.45); font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+    .sort-select {
+      border:1px solid rgba(255,255,255,.12); background:#111; color:#d9d9d9;
+      border-radius:10px; padding:8px 10px; font:inherit; font-size:12px; outline:none;
+    }
+    .task-grid { display:grid; grid-template-columns:1fr; gap:7px; }
+    .task-grid-row {
+      display:grid;
+      grid-template-columns:26px 28px minmax(0,1fr) auto;
+      gap:10px; align-items:center;
+      min-height:48px; padding:8px 10px;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:12px;
+      background:rgba(255,255,255,.018);
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .task-grid-row.dragging { opacity:.5; transform:scale(.985); }
+    .task-grid-row.drop-target { border-color:rgba(255,255,255,.28); background:rgba(255,255,255,.05); }
+    .drag-grip {
+      width:26px; height:30px; display:grid; place-items:center; cursor:grab; touch-action:none;
+      color:rgba(255,255,255,.28); border:0; background:transparent; padding:0;
+      font-size:0; letter-spacing:0;
+    }
+    .drag-grip::before { content:""; width:17px; height:17px; background-image:radial-gradient(circle, currentColor 1.25px, transparent 1.55px); background-size:6px 6px; background-position:0 0; }
+    .drag-grip:active { cursor:grabbing; }
+    .overview-check {
+      width:22px; height:22px; min-width:22px; min-height:22px; border-radius:5px;
+      border:1.5px solid rgba(255,255,255,.34); background:transparent; position:relative;
+    }
+    .overview-check.checked { border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.12); }
+    .overview-check.checked::after { content:'✓'; position:absolute; inset:0; display:grid; place-items:center; font-size:14px; color:rgba(255,255,255,.75); }
+    .overview-text { min-width:0; }
+    .overview-title { font-size:14px; line-height:1.25; color:rgba(255,255,255,.76); overflow-wrap:anywhere; }
+    .overview-title.done { text-decoration:line-through; color:rgba(255,255,255,.3); }
+    .overview-path { margin-top:3px; font-size:10px; color:rgba(255,255,255,.25); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .overview-time { font-variant-numeric:tabular-nums; color:rgba(255,255,255,.38); font-size:12px; white-space:nowrap; }
+    .level-guide { display:inline-block; width:calc(var(--level,0) * 14px); max-width:112px; }
+
+    .editor-help-code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:rgba(255,255,255,.57); }
+
+    @media (max-width:700px) {
+      .task-grid-row { grid-template-columns:22px 24px minmax(0,1fr) auto; gap:8px; padding:8px; }
+      .drag-grip { width:22px; }
+      .overview-time { font-size:11px; }
+      .task-overview-toolbar { align-items:flex-start; flex-direction:column; }
+    }
+
   </style>
 </head>
 <body>
@@ -815,7 +900,8 @@
         <button class="mode-btn clear-task-btn" id="quickClearTasksBtn" type="button" aria-label="Clear all tasks">CLEAR</button>
       </div>
       <div class="task-display task-swipe-hint" id="taskDisplay" title="Swipe left for next task, right for previous"></div>
-      <div class="task-counter" id="taskCounter"></div>
+      <div class="task-context" id="taskContext"></div>
+      <div class="task-counter" id="taskCounter" role="button" tabindex="0" aria-label="See all tasks"></div>
     </section>
 
     <div class="hint" id="hint"></div>
@@ -823,15 +909,37 @@
     <div class="panel-backdrop" id="panelBackdrop"></div>
     <section class="panel" id="taskPanel" aria-label="Task list editor">
       <div class="panel-header"><div class="panel-title">EDIT TASKS</div><button class="panel-close" data-close-panel type="button">×</button></div>
-      <textarea id="taskInput" placeholder="Finish chemistry worksheet
-Review matrices
-Read geography notes
-Draft film scene"></textarea>
-      <div class="panel-actions">
-        <button class="panel-action primary" id="saveTasksBtn" type="button">Start tasks</button>
-        <button class="panel-action danger" id="clearTasksBtn" type="button">Clear</button>
+      <textarea id="taskInput" spellcheck="true" placeholder="Main task
+	Subtask
+		Sub-subtask
+Another task"></textarea>
+      <div class="panel-actions compact">
+        <div class="panel-actions-left">
+          <button class="panel-action primary" id="saveTasksBtn" type="button">Start tasks</button>
+        </div>
+        <div class="panel-actions-right">
+          <button class="panel-action" id="pasteTasksBtn" type="button">Paste</button>
+          <button class="panel-action danger" id="clearTasksBtn" type="button">Clear</button>
+        </div>
       </div>
-      <div class="panel-note">One line = one task. Every task automatically has its own checkbox and timer. There are no subtasks. Swipe left/right to move through the same flat checklist.</div>
+      <div class="panel-note">Each line is a task with its own checkbox and timer. Use <span class="editor-help-code">Tab</span> / <span class="editor-help-code">Shift+Tab</span> at the start of a line to create unlimited nesting. Indentation is preserved when you save.</div>
+    </section>
+
+    <section class="panel" id="seeTasksPanel" aria-label="See tasks">
+      <div class="panel-header"><div class="panel-title">SEE TASKS</div><button class="panel-close" data-close-panel type="button">×</button></div>
+      <div class="task-overview-toolbar">
+        <div class="task-overview-stats" id="taskOverviewStats">0 OPEN · 0 DONE</div>
+        <select class="sort-select" id="taskSortSelect" aria-label="Sort tasks">
+          <option value="manual">Manual order</option>
+          <option value="open">Open first</option>
+          <option value="done">Completed first</option>
+          <option value="time-desc">Most time</option>
+          <option value="time-asc">Least time</option>
+          <option value="title">A → Z</option>
+        </select>
+      </div>
+      <div class="task-grid" id="taskGrid"></div>
+      <div class="panel-note">Drag the nine-dot grip to change manual order. Sorting is only a viewing aid unless you drag; your task sequence remains manual.</div>
     </section>
 
     <section class="panel" id="messagePanel" aria-label="Lock in message editor">
@@ -873,6 +981,12 @@ Draft film scene"></textarea>
       const taskCounter = document.getElementById('taskCounter');
       const taskPanel = document.getElementById('taskPanel');
       const taskInput = document.getElementById('taskInput');
+      const taskContext = document.getElementById('taskContext');
+      const seeTasksPanel = document.getElementById('seeTasksPanel');
+      const taskGrid = document.getElementById('taskGrid');
+      const taskSortSelect = document.getElementById('taskSortSelect');
+      const taskOverviewStats = document.getElementById('taskOverviewStats');
+      const pasteTasksBtn = document.getElementById('pasteTasksBtn');
       const saveTasksBtn = document.getElementById('saveTasksBtn');
       const clearTasksBtn = document.getElementById('clearTasksBtn');
       const quickClearTasksBtn = document.getElementById('quickClearTasksBtn');
@@ -900,6 +1014,8 @@ Draft film scene"></textarea>
       let wakeLock = null;
       let keepAwakeWanted = false;
       let wakeRetryTimer = null;
+      let fullscreenWanted = false;
+      let fullscreenRestoreQueued = false;
 
       function showHint(text) {
         hint.textContent = text;
@@ -1045,6 +1161,7 @@ Draft film scene"></textarea>
           if (!activeFullscreen) {
             // Set this before the request so the same user gesture can also authorize wake lock on iPadOS.
             keepAwakeWanted = true;
+            fullscreenWanted = true;
             await requestWakeLock({ quiet: true });
 
             const target = document.documentElement;
@@ -1069,6 +1186,7 @@ Draft film scene"></textarea>
             await requestWakeLock({ quiet: true });
           } else {
             keepAwakeWanted = false;
+            fullscreenWanted = false;
             await releaseWakeLock();
             if (document.exitFullscreen) await document.exitFullscreen();
             else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
@@ -1077,6 +1195,7 @@ Draft film scene"></textarea>
           // If fullscreen was blocked, don't leave the wake lock running unexpectedly.
           if (!isDisplayFullscreen()) {
             keepAwakeWanted = false;
+            fullscreenWanted = false;
             await releaseWakeLock();
           }
           showHint('Fullscreen was blocked by the browser');
@@ -1090,9 +1209,31 @@ Draft film scene"></textarea>
         if (nativeFullscreen || standalone) {
           keepAwakeWanted = true;
           requestWakeLock({ quiet: true });
-        } else {
+        } else if (!fullscreenWanted) {
           keepAwakeWanted = false;
           releaseWakeLock();
+        } else {
+          // iPadOS can dismiss native fullscreen when its software keyboard appears.
+          // Keep the user's fullscreen intent alive; the next trusted tap can restore it.
+          keepAwakeWanted = true;
+          requestWakeLock({ quiet: true });
+        }
+      }
+
+      async function restoreFullscreenFromTrustedGesture() {
+        if (!fullscreenWanted || document.fullscreenElement || document.webkitFullscreenElement || window.navigator.standalone) return;
+        if (fullscreenRestoreQueued) return;
+        fullscreenRestoreQueued = true;
+        try {
+          const target = document.documentElement;
+          if (target.requestFullscreen) {
+            try { await target.requestFullscreen({ navigationUI: 'hide' }); }
+            catch (_) { try { await target.requestFullscreen(); } catch (_) {} }
+          } else if (target.webkitRequestFullscreen) {
+            try { target.webkitRequestFullscreen(); } catch (_) {}
+          }
+        } finally {
+          fullscreenRestoreQueued = false;
         }
       }
 
@@ -1117,6 +1258,22 @@ Draft film scene"></textarea>
         event.preventDefault();
         toggleFullscreen();
       });
+
+      // v8: form interaction never toggles fullscreen. If iPadOS itself drops
+      // native fullscreen because the keyboard appeared, a subsequent trusted tap
+      // inside the open panel attempts to restore it. This does not bind fullscreen
+      // exit to any panel control.
+      document.addEventListener('pointerup', (event) => {
+        if (event.target.closest('.panel, .panel-backdrop, .focus-row, .task-display, .task-counter')) {
+          restoreFullscreenFromTrustedGesture();
+        }
+      }, true);
+
+      document.addEventListener('touchend', (event) => {
+        if (event.target.closest('.panel, .panel-backdrop, .focus-row, .task-display, .task-counter')) {
+          restoreFullscreenFromTrustedGesture();
+        }
+      }, { passive: true, capture: true });
 
       function beginMessageEdit(event) {
         event?.preventDefault();
@@ -1183,8 +1340,8 @@ Draft film scene"></textarea>
         }
       });
 
-      // ---------- Task mode v7 ----------
-      // Flat checklist: each line is one task. Every task owns a checkbox and timer.
+      // ---------- Task mode v8 ----------
+      // Every line remains an actionable task. Leading tabs create arbitrary-depth hierarchy.
       let tasks = [];
       let taskIndex = 0; // tasks.length is the special ALL DONE page.
       let taskMode = false;
@@ -1192,37 +1349,39 @@ Draft film scene"></textarea>
       let timerPaintInterval = null;
       let lastPersistAt = 0;
       let suppressTaskCheckUntil = 0;
+      let taskSortMode = 'manual';
 
       function normalizeTask(raw) {
         if (typeof raw === 'string') {
           const title = raw.trim();
-          return title ? { title, done: false, elapsedMs: 0 } : null;
+          return title ? { id: crypto.randomUUID?.() || Math.random().toString(36).slice(2), title, level:0, done:false, elapsedMs:0 } : null;
         }
         if (!raw || typeof raw !== 'object') return null;
-        const title = String(raw.title || '').trim();
+        const title = String(raw.title || raw.text || '').trim();
         if (!title) return null;
         return {
+          id: String(raw.id || (crypto.randomUUID?.() || Math.random().toString(36).slice(2))),
           title,
+          level: Math.max(0, Number(raw.level) || 0),
           done: Boolean(raw.done),
           elapsedMs: Math.max(0, Number(raw.elapsedMs) || 0)
         };
       }
 
-      // Migrate v6's optional nested checklist into the new one-level model so
-      // nothing the user typed is silently lost.
       function migrateSavedTasks(saved) {
-        const flat = [];
+        const out = [];
         for (const raw of Array.isArray(saved) ? saved : []) {
           const parent = normalizeTask(raw);
-          if (parent) flat.push(parent);
+          if (parent) out.push(parent);
+          // Preserve old v6 nested checklist data as one level deeper.
           if (raw && typeof raw === 'object' && Array.isArray(raw.checklist)) {
             for (const child of raw.checklist) {
-              const title = typeof child === 'string' ? child.trim() : String(child?.text || '').trim();
-              if (title) flat.push({ title, done: Boolean(child?.done), elapsedMs: 0 });
+              const c = normalizeTask(typeof child === 'string' ? child : { title: child?.text, done: child?.done, level:(parent?.level||0)+1 });
+              if (c) { c.level = (parent?.level||0)+1; out.push(c); }
             }
           }
         }
-        return flat;
+        return out;
       }
 
       try {
@@ -1230,12 +1389,12 @@ Draft film scene"></textarea>
         tasks = migrateSavedTasks(savedTasks);
         const savedIndex = Number(localStorage.getItem('flipclock-task-index') || 0);
         taskIndex = Math.max(0, Math.min(Number.isFinite(savedIndex) ? savedIndex : 0, tasks.length));
+        taskSortMode = localStorage.getItem('flipclock-task-sort') || 'manual';
       } catch (_) {}
 
       function taskSnapshotForStorage() {
         return tasks.map((task, i) => ({
-          title: task.title,
-          done: Boolean(task.done),
+          id:task.id, title:task.title, level:task.level, done:Boolean(task.done),
           elapsedMs: Math.max(0, Math.round(task.elapsedMs + (
             activeTimerStartedAt !== null && i === taskIndex ? Date.now() - activeTimerStartedAt : 0
           )))
@@ -1245,15 +1404,16 @@ Draft film scene"></textarea>
       function persistTasks() {
         localStorage.setItem('flipclock-tasks', JSON.stringify(taskSnapshotForStorage()));
         localStorage.setItem('flipclock-task-index', String(taskIndex));
+        localStorage.setItem('flipclock-task-sort', taskSortMode);
         lastPersistAt = Date.now();
       }
 
       function formatElapsed(ms) {
         const total = Math.max(0, Math.floor(ms / 1000));
-        const hours = Math.floor(total / 3600);
-        const mins = Math.floor((total % 3600) / 60);
-        const secs = total % 60;
-        return [hours, mins, secs].map(v => String(v).padStart(2, '0')).join(':');
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = total % 60;
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
       }
 
       function currentElapsedFor(index) {
@@ -1278,6 +1438,8 @@ Draft film scene"></textarea>
       function updateTaskTimerPaint() {
         const timer = taskDisplay.querySelector('[data-task-timer]');
         if (timer && taskIndex < tasks.length) timer.textContent = formatElapsed(currentElapsedFor(taskIndex));
+        const overview = document.querySelector(`[data-overview-time-index="${taskIndex}"]`);
+        if (overview && taskIndex < tasks.length) overview.textContent = formatElapsed(currentElapsedFor(taskIndex));
         if (activeTimerStartedAt !== null && Date.now() - lastPersistAt > 5000) persistTasks();
       }
 
@@ -1291,218 +1453,250 @@ Draft film scene"></textarea>
         return String(value).replace(/[&<>\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]));
       }
 
+      function hierarchyPath(index) {
+        if (index < 0 || index >= tasks.length) return [];
+        const level = tasks[index].level;
+        if (level <= 0) return [];
+        const path = [];
+        let wanted = level - 1;
+        for (let i=index-1; i>=0 && wanted>=0; i--) {
+          if (tasks[i].level === wanted) { path.unshift(tasks[i].title); wanted--; }
+        }
+        return path;
+      }
+
       function renderTask() {
         taskDisplay.innerHTML = '';
+        taskContext.innerHTML = '';
 
         if (!tasks.length) {
           taskDisplay.innerHTML = '<div class="task-main-row"><div class="task-title">ADD YOUR TASKS</div></div>';
           taskCounter.textContent = '';
+          taskContext.classList.remove('active');
           return;
         }
 
         if (taskIndex >= tasks.length) {
-          taskDisplay.innerHTML = '<div class="all-done-title">ALL DONE</div><div class="all-done-sub">SWIPE RIGHT TO GO BACK</div>';
-          taskCounter.textContent = '0 LEFT';
+          taskDisplay.innerHTML = '<div class="all-done-title" data-see-tasks>ALL DONE</div><div class="all-done-sub">TAP ALL DONE TO REVIEW · SWIPE RIGHT TO GO BACK</div>';
+          taskCounter.textContent = '0 LEFT · SEE TASKS';
+          taskContext.classList.remove('active');
           return;
         }
 
         const task = tasks[taskIndex];
-        const unchecked = tasks.reduce((n, t) => n + (t.done ? 0 : 1), 0);
+        const unchecked = tasks.reduce((n,t)=>n+(t.done?0:1),0);
+        const path = hierarchyPath(taskIndex);
         taskDisplay.innerHTML = `
           <div class="task-current">
-            <button class="task-current-check${task.done ? ' checked' : ''}" type="button" data-current-task-check aria-pressed="${task.done ? 'true' : 'false'}" aria-label="${task.done ? 'Mark task incomplete' : 'Mark task complete'}"></button>
-            <div class="task-title${task.done ? ' done' : ''}">${escapeHtml(task.title)}</div>
+            <button class="task-current-check${task.done?' checked':''}" type="button" data-current-task-check aria-pressed="${task.done?'true':'false'}" aria-label="${task.done?'Mark task incomplete':'Mark task complete'}"></button>
+            <div class="task-title${task.done?' done':''}">${escapeHtml(task.title)}</div>
             <div class="task-timer" data-task-timer>${formatElapsed(currentElapsedFor(taskIndex))}</div>
           </div>`;
-        taskCounter.textContent = `${unchecked} UNCHECKED · ${taskIndex + 1}/${tasks.length}`;
+        if (path.length) {
+          taskContext.innerHTML = path.map((p,i)=>`${i?' <span>›</span> ':''}${escapeHtml(p)}`).join('');
+          taskContext.classList.add('active');
+        } else taskContext.classList.remove('active');
+        taskCounter.textContent = `${unchecked} UNCHECKED · ${taskIndex+1}/${tasks.length}`;
       }
 
       function setTaskMode(on) {
-        if (taskMode && !on) pauseActiveTimer({ persist: true });
-        taskMode = on;
-        focusRow.classList.toggle('task-mode', on);
-        taskDisplay.classList.toggle('active', on);
-        taskCounter.classList.toggle('active', on);
-        taskModeBtn.classList.toggle('active', on);
-        taskModeBtn.textContent = on ? 'EDIT' : 'TASK';
+        if (taskMode && !on) pauseActiveTimer({persist:true});
+        taskMode=on;
+        focusRow.classList.toggle('task-mode',on);
+        taskDisplay.classList.toggle('active',on);
+        taskContext.classList.toggle('active', on && taskIndex<tasks.length && hierarchyPath(taskIndex).length>0);
+        taskCounter.classList.toggle('active',on);
+        taskModeBtn.classList.toggle('active',on);
+        taskModeBtn.textContent=on?'EDIT':'TASK';
         renderTask();
-        if (on) resumeActiveTimer();
+        if(on) resumeActiveTimer();
       }
 
       function openPanel(panel) {
-        [taskPanel, audioPanel, messagePanel].forEach(p => p.classList.remove('open'));
+        [taskPanel, seeTasksPanel, audioPanel, messagePanel].forEach(p=>p.classList.remove('open'));
         panel.classList.add('open');
         panelBackdrop.classList.add('open');
         document.documentElement.classList.add('panel-open');
+        if (panel===seeTasksPanel) renderTaskOverview();
       }
 
       function closePanels() {
-        taskPanel.classList.remove('open');
-        audioPanel.classList.remove('open');
-        messagePanel.classList.remove('open');
+        [taskPanel, seeTasksPanel, audioPanel, messagePanel].forEach(p=>p.classList.remove('open'));
         panelBackdrop.classList.remove('open');
         document.documentElement.classList.remove('panel-open');
       }
 
       function tasksToEditorText() {
-        return tasks.map(task => task.title).join('\n');
+        return tasks.map(task => `${'\t'.repeat(task.level)}${task.title}`).join('\n');
       }
 
       function parseEditorTasks(value) {
-        const titles = String(value || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
-        const oldByTitle = new Map(tasks.map((t, i) => [t.title.trim().toLowerCase(), { task:t, index:i }]));
-        return titles.map(title => {
-          const old = oldByTitle.get(title.toLowerCase());
+        const lines=String(value||'').split(/\r?\n/).filter(line=>line.trim().length);
+        const oldByKey=new Map(tasks.map((t,i)=>[`${t.level}|${t.title.trim().toLowerCase()}`,{task:t,index:i}]));
+        const titleFallback=new Map(tasks.map((t,i)=>[t.title.trim().toLowerCase(),{task:t,index:i}]));
+        return lines.map(line=>{
+          const indent=(line.match(/^\t+/)?.[0].length) ?? Math.floor((line.match(/^ +/)?.[0].length||0)/2);
+          const title=line.trim();
+          const old=oldByKey.get(`${indent}|${title.toLowerCase()}`)||titleFallback.get(title.toLowerCase());
           return old ? {
-            title,
-            done: Boolean(old.task.done),
-            elapsedMs: currentElapsedFor(old.index)
-          } : { title, done: false, elapsedMs: 0 };
+            id:old.task.id, title, level:indent, done:Boolean(old.task.done), elapsedMs:currentElapsedFor(old.index)
+          } : { id:crypto.randomUUID?.()||Math.random().toString(36).slice(2), title, level:indent, done:false, elapsedMs:0 };
         });
       }
 
-      taskModeBtn.addEventListener('click', (event) => {
+      // Tab / Shift+Tab indents the current line(s) instead of moving focus.
+      taskInput.addEventListener('keydown', event=>{
+        if(event.key!=='Tab') return;
         event.preventDefault();
-        event.stopPropagation();
-        if (!taskMode) {
-          if (tasks.length) setTaskMode(true);
-          else { taskInput.value = ''; openPanel(taskPanel); }
+        const value=taskInput.value;
+        const start=taskInput.selectionStart, end=taskInput.selectionEnd;
+        const lineStart=value.lastIndexOf('\n',start-1)+1;
+        const endLineBreak=value.indexOf('\n',end);
+        const blockEnd=endLineBreak===-1?value.length:endLineBreak;
+        const block=value.slice(lineStart,blockEnd);
+        if(!event.shiftKey){
+          const next=block.split('\n').map(x=>'\t'+x).join('\n');
+          taskInput.setRangeText(next,lineStart,blockEnd,'select');
         } else {
-          taskInput.value = tasksToEditorText();
+          const next=block.split('\n').map(x=>x.startsWith('\t')?x.slice(1):x.replace(/^ {1,2}/,'')).join('\n');
+          taskInput.setRangeText(next,lineStart,blockEnd,'select');
+        }
+      });
+
+      pasteTasksBtn.addEventListener('click', async event=>{
+        event.preventDefault(); event.stopPropagation();
+        try {
+          const text=await navigator.clipboard.readText();
+          if(!text) return showHint('Clipboard is empty');
+          const prefix=taskInput.value && !taskInput.value.endsWith('\n')?'\n':'';
+          taskInput.value += prefix + text;
+          taskInput.dispatchEvent(new Event('input',{bubbles:true}));
+          showHint('Pasted');
+        } catch (_) {
+          showHint('Tap the box, then use Paste');
+        }
+      });
+
+      taskModeBtn.addEventListener('click', event=>{
+        event.preventDefault(); event.stopPropagation();
+        if(!taskMode){
+          if(tasks.length) setTaskMode(true);
+          else { taskInput.value=''; openPanel(taskPanel); }
+        } else {
+          taskInput.value=tasksToEditorText();
           openPanel(taskPanel);
         }
       });
 
-      saveTasksBtn.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        pauseActiveTimer({ persist: false });
-        tasks = parseEditorTasks(taskInput.value);
-        taskIndex = tasks.length ? Math.min(taskIndex, tasks.length - 1) : 0;
-        persistTasks();
-        closePanels();
-        if (tasks.length) {
-          setTaskMode(true);
-          showHint('Task list saved');
-        } else {
-          setTaskMode(false);
-          showHint('Add at least one task');
-        }
+      saveTasksBtn.addEventListener('click', event=>{
+        event.preventDefault(); event.stopPropagation();
+        pauseActiveTimer({persist:false});
+        tasks=parseEditorTasks(taskInput.value);
+        taskIndex=tasks.length?Math.min(taskIndex,tasks.length-1):0;
+        persistTasks(); closePanels();
+        if(tasks.length){ setTaskMode(true); showHint('Task list saved'); }
+        else { setTaskMode(false); showHint('Add at least one task'); }
       });
 
-      function clearAllTasks() {
-        pauseActiveTimer({ persist: false });
-        tasks = [];
-        taskIndex = 0;
-        activeTimerStartedAt = null;
-        localStorage.removeItem('flipclock-tasks');
-        localStorage.removeItem('flipclock-task-index');
-        taskInput.value = '';
-        closePanels();
-        setTaskMode(false);
-        showHint('Tasks cleared');
+      function clearAllTasks(){
+        pauseActiveTimer({persist:false}); tasks=[]; taskIndex=0; activeTimerStartedAt=null;
+        localStorage.removeItem('flipclock-tasks'); localStorage.removeItem('flipclock-task-index');
+        taskInput.value=''; closePanels(); setTaskMode(false); showHint('Tasks cleared');
+      }
+      clearTasksBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();clearAllTasks();});
+      quickClearTasksBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();clearAllTasks();});
+
+      taskDisplay.addEventListener('click',event=>{
+        const see=event.target.closest('[data-see-tasks]');
+        if(see){ event.preventDefault();event.stopPropagation();openPanel(seeTasksPanel);return; }
+        const check=event.target.closest('[data-current-task-check]');
+        if(!check||Date.now()<suppressTaskCheckUntil||taskIndex>=tasks.length)return;
+        event.preventDefault();event.stopPropagation(); tasks[taskIndex].done=!tasks[taskIndex].done; persistTasks();renderTask();
+      });
+
+      function openTaskOverview(event){ event?.preventDefault();event?.stopPropagation(); if(tasks.length) openPanel(seeTasksPanel); }
+      taskCounter.addEventListener('click',openTaskOverview);
+      taskCounter.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTaskOverview(e);}});
+
+      function sortedOverviewEntries(){
+        const arr=tasks.map((task,index)=>({task,index,elapsed:currentElapsedFor(index)}));
+        if(taskSortMode==='open') arr.sort((a,b)=>Number(a.task.done)-Number(b.task.done)||a.index-b.index);
+        if(taskSortMode==='done') arr.sort((a,b)=>Number(b.task.done)-Number(a.task.done)||a.index-b.index);
+        if(taskSortMode==='time-desc') arr.sort((a,b)=>b.elapsed-a.elapsed);
+        if(taskSortMode==='time-asc') arr.sort((a,b)=>a.elapsed-b.elapsed);
+        if(taskSortMode==='title') arr.sort((a,b)=>a.task.title.localeCompare(b.task.title));
+        return arr;
       }
 
-      clearTasksBtn.addEventListener('click', (event) => {
-        event.preventDefault(); event.stopPropagation(); clearAllTasks();
-      });
-      quickClearTasksBtn.addEventListener('click', (event) => {
-        event.preventDefault(); event.stopPropagation(); clearAllTasks();
+      function renderTaskOverview(){
+        if(!taskGrid)return;
+        const open=tasks.filter(t=>!t.done).length, done=tasks.length-open;
+        taskOverviewStats.textContent=`${open} OPEN · ${done} DONE · ${formatElapsed(tasks.reduce((sum,_,i)=>sum+currentElapsedFor(i),0))} TOTAL`;
+        taskSortSelect.value=taskSortMode;
+        const entries=sortedOverviewEntries();
+        taskGrid.innerHTML=entries.map(({task,index,elapsed})=>{
+          const path=hierarchyPath(index).join(' › ');
+          return `<div class="task-grid-row" data-row-index="${index}" style="--level:${task.level}">
+            <button class="drag-grip" type="button" data-drag-index="${index}" aria-label="Drag to reorder"></button>
+            <button class="overview-check${task.done?' checked':''}" type="button" data-overview-check="${index}" aria-label="${task.done?'Mark incomplete':'Mark complete'}"></button>
+            <div class="overview-text"><div class="overview-title${task.done?' done':''}"><span class="level-guide"></span>${escapeHtml(task.title)}</div>${path?`<div class="overview-path">${escapeHtml(path)}</div>`:''}</div>
+            <div class="overview-time" data-overview-time-index="${index}">${formatElapsed(elapsed)}</div>
+          </div>`;
+        }).join('');
+      }
+
+      taskSortSelect.addEventListener('change',()=>{taskSortMode=taskSortSelect.value;persistTasks();renderTaskOverview();});
+      taskGrid.addEventListener('click',event=>{
+        const c=event.target.closest('[data-overview-check]'); if(!c)return;
+        event.preventDefault();event.stopPropagation(); const i=Number(c.dataset.overviewCheck); if(!tasks[i])return;
+        tasks[i].done=!tasks[i].done;persistTasks();renderTaskOverview();renderTask();
       });
 
-      taskDisplay.addEventListener('click', (event) => {
-        const check = event.target.closest('[data-current-task-check]');
-        if (!check || Date.now() < suppressTaskCheckUntil || taskIndex >= tasks.length) return;
-        event.preventDefault();
-        event.stopPropagation();
-        tasks[taskIndex].done = !tasks[taskIndex].done;
-        persistTasks();
-        renderTask();
+      // Touch/mouse drag reorder. Reordering automatically returns the overview to Manual.
+      let dragIndex=null, dragTarget=null;
+      function endOverviewDrag(){
+        if(dragIndex===null)return;
+        const from=dragIndex,to=dragTarget;
+        taskGrid.querySelectorAll('.task-grid-row').forEach(r=>r.classList.remove('dragging','drop-target'));
+        dragIndex=dragTarget=null;
+        if(to===null||from===to)return;
+        pauseActiveTimer({persist:false});
+        const wasAllDone = taskIndex >= tasks.length;
+        const activeId=tasks[taskIndex]?.id;
+        const [moved]=tasks.splice(from,1); tasks.splice(to,0,moved);
+        taskIndex = wasAllDone ? tasks.length : (activeId ? Math.max(0,tasks.findIndex(t=>t.id===activeId)) : 0);
+        taskSortMode='manual'; persistTasks(); renderTaskOverview(); renderTask(); resumeActiveTimer();
+      }
+      taskGrid.addEventListener('pointerdown',event=>{
+        const grip=event.target.closest('[data-drag-index]'); if(!grip)return;
+        event.preventDefault(); dragIndex=Number(grip.dataset.dragIndex); dragTarget=dragIndex;
+        grip.setPointerCapture?.(event.pointerId); taskGrid.querySelector(`[data-row-index="${dragIndex}"]`)?.classList.add('dragging');
       });
+      taskGrid.addEventListener('pointermove',event=>{
+        if(dragIndex===null)return; event.preventDefault();
+        const row=document.elementFromPoint(event.clientX,event.clientY)?.closest?.('[data-row-index]'); if(!row)return;
+        const next=Number(row.dataset.rowIndex); if(!Number.isFinite(next))return;
+        dragTarget=next; taskGrid.querySelectorAll('.task-grid-row').forEach(r=>r.classList.toggle('drop-target',Number(r.dataset.rowIndex)===next));
+      });
+      taskGrid.addEventListener('pointerup',endOverviewDrag); taskGrid.addEventListener('pointercancel',endOverviewDrag);
 
       // Left = next; right = previous. Past the final task = ALL DONE.
-      let taskTouchStartX = null;
-      let taskTouchStartY = null;
-      let taskTouchDx = 0;
-
-      function animateTaskChange(direction) {
-        if (!tasks.length) return;
-        const goingNext = direction === 'next';
-        const targetIndex = goingNext ? Math.min(taskIndex + 1, tasks.length) : Math.max(taskIndex - 1, 0);
-        if (targetIndex === taskIndex) {
-          taskDisplay.style.transform = '';
-          taskDisplay.style.opacity = '';
-          return;
-        }
-
-        pauseActiveTimer({ persist: false });
-        suppressTaskCheckUntil = Date.now() + 420;
-        taskDisplay.style.transform = '';
-        taskDisplay.style.opacity = '';
-        taskDisplay.classList.add(goingNext ? 'next' : 'prev');
-
-        setTimeout(() => {
-          taskIndex = targetIndex;
-          persistTasks();
-          renderTask();
-          taskDisplay.classList.remove('next', 'prev');
-          taskDisplay.style.transition = 'none';
-          taskDisplay.style.transform = `translateX(${goingNext ? '34px' : '-34px'})`;
-          taskDisplay.style.opacity = '0';
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            taskDisplay.style.transition = '';
-            taskDisplay.style.transform = '';
-            taskDisplay.style.opacity = '';
-            resumeActiveTimer();
-          }));
-        }, 145);
+      let taskTouchStartX=null, taskTouchStartY=null, taskTouchDx=0;
+      function animateTaskChange(direction){
+        if(!tasks.length)return; const goingNext=direction==='next';
+        const targetIndex=goingNext?Math.min(taskIndex+1,tasks.length):Math.max(taskIndex-1,0);
+        if(targetIndex===taskIndex){taskDisplay.style.transform='';taskDisplay.style.opacity='';return;}
+        pauseActiveTimer({persist:false}); suppressTaskCheckUntil=Date.now()+420;
+        taskDisplay.style.transform='';taskDisplay.style.opacity='';taskDisplay.classList.add(goingNext?'next':'prev');
+        setTimeout(()=>{taskIndex=targetIndex;persistTasks();renderTask();taskDisplay.classList.remove('next','prev');taskDisplay.style.transition='none';taskDisplay.style.transform=`translateX(${goingNext?'34px':'-34px'})`;taskDisplay.style.opacity='0';requestAnimationFrame(()=>requestAnimationFrame(()=>{taskDisplay.style.transition='';taskDisplay.style.transform='';taskDisplay.style.opacity='';resumeActiveTimer();}));},145);
       }
+      taskDisplay.addEventListener('touchstart',e=>{if(!taskMode||!tasks.length)return;const t=e.changedTouches[0];taskTouchStartX=t.clientX;taskTouchStartY=t.clientY;taskTouchDx=0;taskDisplay.classList.add('swiping');},{passive:true});
+      taskDisplay.addEventListener('touchmove',e=>{if(taskTouchStartX===null)return;const t=e.changedTouches[0],dx=t.clientX-taskTouchStartX,dy=t.clientY-taskTouchStartY;if(Math.abs(dx)>Math.abs(dy)){e.preventDefault();taskTouchDx=Math.max(-100,Math.min(100,dx));taskDisplay.style.transform=`translateX(${taskTouchDx*.34}px)`;taskDisplay.style.opacity=String(Math.max(.58,1-Math.abs(taskTouchDx)/245));}},{passive:false});
+      taskDisplay.addEventListener('touchend',e=>{if(taskTouchStartX===null)return;const t=e.changedTouches[0],dx=t.clientX-taskTouchStartX,dy=t.clientY-taskTouchStartY;taskTouchStartX=taskTouchStartY=null;taskDisplay.classList.remove('swiping');const horizontal=Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.15;if(horizontal)animateTaskChange(dx<0?'next':'prev');else{taskDisplay.style.transform='';taskDisplay.style.opacity='';}},{passive:true});
+      taskDisplay.addEventListener('dblclick',event=>{if(event.target.closest('[data-current-task-check], [data-see-tasks]'))return;if(!taskMode||!tasks.length)return;animateTaskChange('next');});
 
-      taskDisplay.addEventListener('touchstart', (e) => {
-        if (!taskMode || !tasks.length) return;
-        const t = e.changedTouches[0];
-        taskTouchStartX = t.clientX;
-        taskTouchStartY = t.clientY;
-        taskTouchDx = 0;
-        taskDisplay.classList.add('swiping');
-      }, { passive: true });
-
-      taskDisplay.addEventListener('touchmove', (e) => {
-        if (taskTouchStartX === null) return;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - taskTouchStartX;
-        const dy = t.clientY - taskTouchStartY;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          e.preventDefault();
-          taskTouchDx = Math.max(-100, Math.min(100, dx));
-          taskDisplay.style.transform = `translateX(${taskTouchDx * .34}px)`;
-          taskDisplay.style.opacity = String(Math.max(.58, 1 - Math.abs(taskTouchDx) / 245));
-        }
-      }, { passive: false });
-
-      taskDisplay.addEventListener('touchend', (e) => {
-        if (taskTouchStartX === null) return;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - taskTouchStartX;
-        const dy = t.clientY - taskTouchStartY;
-        taskTouchStartX = taskTouchStartY = null;
-        taskDisplay.classList.remove('swiping');
-        const isHorizontalSwipe = Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.15;
-        if (isHorizontalSwipe) animateTaskChange(dx < 0 ? 'next' : 'prev');
-        else { taskDisplay.style.transform = ''; taskDisplay.style.opacity = ''; }
-      }, { passive: true });
-
-      taskDisplay.addEventListener('dblclick', (event) => {
-        if (event.target.closest('[data-current-task-check]')) return;
-        if (!taskMode || !tasks.length) return;
-        animateTaskChange('next');
-      });
-
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') pauseActiveTimer({ persist: true });
-        else resumeActiveTimer();
-      });
-      window.addEventListener('pagehide', () => pauseActiveTimer({ persist: true }));
+      document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')pauseActiveTimer({persist:true});else resumeActiveTimer();});
+      window.addEventListener('pagehide',()=>pauseActiveTimer({persist:true}));
 
       // ---------- Soundtrack v7 ----------
       function extractYouTubeId(value) {
@@ -1654,7 +1848,7 @@ Draft film scene"></textarea>
       if (savedYoutube) youtubeUrl.value = savedYoutube;
       renderYouTubeHistory();
 
-      panelBackdrop.addEventListener('click', closePanels);
+      panelBackdrop.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); closePanels(); });
       document.querySelectorAll('[data-close-panel]').forEach(btn => btn.addEventListener('click', closePanels));
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanels(); });
 
@@ -1679,7 +1873,7 @@ Draft film scene"></textarea>
         }, { passive: false });
         panel.addEventListener('touchend', (event) => { startY = null; event.stopPropagation(); }, { passive: true });
       }
-      [taskPanel, audioPanel, messagePanel].forEach(installPanelScrollContainment);
+      [taskPanel, seeTasksPanel, audioPanel, messagePanel].forEach(installPanelScrollContainment);
       panelBackdrop.addEventListener('touchmove', event => event.preventDefault(), { passive: false });
 
       // Prevent accidental selection/context menus on the clock face; form fields remain normal.
